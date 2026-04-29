@@ -177,5 +177,6 @@
 7. `services/import_/header_validator.py` — валидация заголовков листов vs SHEET_COLUMNS (107 строк) + 11 unit-тестов.
 8. `tests/fixtures/import_fixtures.py` — build_workbook, 6 row-factory, minimal_valid_workbook (159 строк).
 9. `services/import_/parser.py` — parse_workbook: XLSX→ParsedData + errors + warnings (205 строк) + 10 unit-тестов.
+10. `services/import_/cross_validator.py` — кросс-валидация: 5 правил (loan_code refs, income_code refs, loan→balance, balance equation ±0.01, future snapshot_date). 160 строк + 16 unit-тестов.
 
-**Тесты:** 120 pass, 0 fail. `ruff check` — clean (legacy-файлы имеют pre-existing violations, не от этой задачи).
+**Тесты:** 136 pass, 0 fail. `ruff check` — clean.
