@@ -35,7 +35,13 @@ export function PaymentFilters({ filters, onChange }: PaymentFiltersProps) {
         onValueChange={(v) => v && onChange({ ...filters, loan_id: v })}
       >
         <SelectTrigger className="w-52">
-          <SelectValue placeholder="Кредит" />
+          <SelectValue placeholder="Кредит">
+            {(v: string) => {
+              if (v === "all") return "Все кредиты";
+              const l = (loans ?? []).find(loan => loan.id === v);
+              return l ? `${l.name} (${l.creditor})` : "Кредит";
+            }}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Все кредиты</SelectItem>
@@ -53,7 +59,16 @@ export function PaymentFilters({ filters, onChange }: PaymentFiltersProps) {
         onValueChange={(v) => v && onChange({ ...filters, type: v })}
       >
         <SelectTrigger className="w-44">
-          <SelectValue placeholder="Тип" />
+          <SelectValue placeholder="Тип">
+            {(v: string) => {
+              const labels: Record<string, string> = {
+                all: "Все типы", regular: "Регулярный", early_partial: "Досрочный частичный",
+                early_full: "Досрочный полный", overpayment: "Переплата",
+                underpayment: "Недоплата", missed: "Пропущен",
+              };
+              return labels[v] ?? v;
+            }}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Все типы</SelectItem>

@@ -206,7 +206,12 @@ export function RegisterPaymentDialog({
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Выберите кредит" />
+                <SelectValue placeholder="Выберите кредит">
+                  {(v: string) => {
+                    const l = (loans ?? []).find(loan => loan.id === v);
+                    return l ? `${l.name} (${l.creditor})` : "Выберите кредит";
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {(loans ?? [])
@@ -236,7 +241,13 @@ export function RegisterPaymentDialog({
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Без привязки" />
+                  <SelectValue placeholder="Без привязки">
+                    {(v: string) => {
+                      if (v === "none") return "Без привязки";
+                      const p = pendingPayments.find(pp => pp.id === v);
+                      return p ? `${p.due_date} — ${formatMoney(p.amount)}` : "Без привязки";
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Без привязки</SelectItem>
@@ -295,7 +306,9 @@ export function RegisterPaymentDialog({
               }}
             >
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue>
+                  {(v: string) => PAYMENT_TYPES.find(t => t.value === v)?.label ?? v}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {PAYMENT_TYPES.map((t) => (

@@ -35,7 +35,15 @@ export function IncomeFilters({ filters, onChange }: IncomeFiltersProps) {
         onValueChange={(v) => v && onChange({ ...filters, status: v })}
       >
         <SelectTrigger className="w-44">
-          <SelectValue placeholder="Статус" />
+          <SelectValue placeholder="Статус">
+            {(v: string) => {
+              const labels: Record<string, string> = {
+                all: "Все статусы", expected: "Ожидается",
+                received: "Получено", cancelled: "Отменено",
+              };
+              return labels[v] ?? v;
+            }}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Все статусы</SelectItem>

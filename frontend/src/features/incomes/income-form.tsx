@@ -193,7 +193,9 @@ export function IncomeFormDialog({ open, onOpenChange, income }: Props) {
               }}
             >
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue>
+                  {(v: string) => STATUSES.find(s => s.value === v)?.label ?? v}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {STATUSES.map((s) => (

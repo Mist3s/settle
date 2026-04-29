@@ -204,7 +204,9 @@ export function LoanFormDialog({ open, onOpenChange, loan }: Props) {
                 onValueChange={(v) => { if (v) setValue("loan_type", v as LoanType); }}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>
+                    {(v: string) => loanTypeLabel(v)}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {LOAN_TYPES.map((t) => (
@@ -222,7 +224,9 @@ export function LoanFormDialog({ open, onOpenChange, loan }: Props) {
                 onValueChange={(v) => { if (v) setValue("payment_method", v as PaymentMethod); }}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>
+                    {(v: string) => PAYMENT_METHODS.find(m => m.value === v)?.label ?? v}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {PAYMENT_METHODS.map((m) => (
@@ -306,7 +310,9 @@ export function LoanFormDialog({ open, onOpenChange, loan }: Props) {
               onValueChange={(v) => { if (v) setValue("prepayment_strategy", v as PrepaymentStrategy); }}
             >
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue>
+                  {(v: string) => STRATEGIES.find(s => s.value === v)?.label ?? v}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {STRATEGIES.map((s) => (

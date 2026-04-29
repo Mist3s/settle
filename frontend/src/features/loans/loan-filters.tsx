@@ -48,7 +48,9 @@ export function LoanFilters({ filters, onChange }: Props) {
         onValueChange={(v) => onChange({ ...filters, type: v ?? "all" })}
       >
         <SelectTrigger className="sm:w-[180px]">
-          <SelectValue placeholder="Все типы" />
+          <SelectValue placeholder="Все типы">
+            {(v: string) => v === "all" ? "Все типы" : loanTypeLabel(v)}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Все типы</SelectItem>
@@ -64,7 +66,9 @@ export function LoanFilters({ filters, onChange }: Props) {
         onValueChange={(v) => onChange({ ...filters, status: v ?? "all" })}
       >
         <SelectTrigger className="sm:w-[180px]">
-          <SelectValue placeholder="Все статусы" />
+          <SelectValue placeholder="Все статусы">
+            {(v: string) => v === "all" ? "Все статусы" : loanStatusLabel(v)}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Все статусы</SelectItem>
