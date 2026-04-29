@@ -16,6 +16,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePaymentBreakdown } from "./hooks";
 import { formatMoneyCompact } from "@/lib/format";
+import { CHART } from "@/lib/chart-colors";
 
 export function PaymentBreakdownChart() {
   const data = usePaymentBreakdown();
@@ -79,19 +80,19 @@ export function PaymentBreakdownChart() {
               <Bar
                 dataKey="principal"
                 stackId="a"
-                fill="hsl(var(--primary))"
+                fill={CHART.principal}
                 radius={[0, 0, 0, 0]}
               />
               <Bar
                 dataKey="interest"
                 stackId="a"
-                fill="hsl(var(--warning))"
+                fill={CHART.interest}
                 radius={[0, 0, 0, 0]}
               />
               <Bar
                 dataKey="installment"
                 stackId="a"
-                fill="hsl(var(--chart-3, 270 50% 60%))"
+                fill={CHART.installment}
                 radius={[4, 4, 0, 0]}
               />
             </BarChart>

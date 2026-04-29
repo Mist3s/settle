@@ -16,6 +16,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatMoneyCompact, formatMoney, formatDateCompact } from "@/lib/format";
+import { CHART } from "@/lib/chart-colors";
 
 interface ScheduleEntry {
   due_date: string;
@@ -107,7 +108,7 @@ export function ScheduleChart({ schedule, isLoading }: Props) {
             <CartesianGrid
               strokeDasharray="3 3"
               vertical={false}
-              stroke="oklch(0.90 0.008 260 / 0.5)"
+              stroke="#d4d4d8"
             />
             <XAxis
               dataKey="label"
@@ -132,14 +133,14 @@ export function ScheduleChart({ schedule, isLoading }: Props) {
               dataKey="principal"
               name="Тело"
               stackId="a"
-              fill="oklch(0.58 0.19 260)"
+              fill={CHART.principal}
               radius={[0, 0, 0, 0]}
             />
             <Bar
               dataKey="interest"
               name="Проценты"
               stackId="a"
-              fill="oklch(0.80 0.18 80)"
+              fill={CHART.interest}
               radius={[4, 4, 0, 0]}
             />
           </BarChart>

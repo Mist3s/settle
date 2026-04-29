@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatMoneyCompact, formatDateCompact, formatMoney } from "@/lib/format";
 import { useForecast } from "./hooks";
+import { CHART } from "@/lib/chart-colors";
 
 interface Props {
   startingBalance: string;
@@ -100,12 +101,12 @@ export function ForecastChart({ startingBalance }: Props) {
               <linearGradient id="forecastGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="oklch(0.58 0.19 260)"
+                  stopColor={CHART.forecast}
                   stopOpacity={0.3}
                 />
                 <stop
                   offset="95%"
-                  stopColor="oklch(0.58 0.19 260)"
+                  stopColor={CHART.forecast}
                   stopOpacity={0}
                 />
               </linearGradient>
@@ -113,12 +114,12 @@ export function ForecastChart({ startingBalance }: Props) {
                 <linearGradient id="deficitGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop
                     offset="5%"
-                    stopColor="oklch(0.63 0.22 25)"
+                    stopColor={CHART.deficit}
                     stopOpacity={0.3}
                   />
                   <stop
                     offset="95%"
-                    stopColor="oklch(0.63 0.22 25)"
+                    stopColor={CHART.deficit}
                     stopOpacity={0}
                   />
                 </linearGradient>
@@ -127,7 +128,7 @@ export function ForecastChart({ startingBalance }: Props) {
             <CartesianGrid
               strokeDasharray="3 3"
               vertical={false}
-              stroke="oklch(0.90 0.008 260 / 0.5)"
+              stroke="#d4d4d8"
             />
             <XAxis
               dataKey="label"
@@ -148,7 +149,7 @@ export function ForecastChart({ startingBalance }: Props) {
               <Area
                 type="monotone"
                 dataKey="balance"
-                stroke="oklch(0.63 0.22 25)"
+                stroke={CHART.deficit}
                 fill="url(#deficitGradient)"
                 strokeWidth={2}
                 dot={false}
@@ -159,7 +160,7 @@ export function ForecastChart({ startingBalance }: Props) {
             <Area
               type="monotone"
               dataKey="balance"
-              stroke="oklch(0.58 0.19 260)"
+              stroke={CHART.forecast}
               fill="url(#forecastGradient)"
               strokeWidth={2}
               dot={false}

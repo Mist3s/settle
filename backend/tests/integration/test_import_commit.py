@@ -453,6 +453,7 @@ async def test_cancel_pending_schedule_audit(db_session: AsyncSession) -> None:
         await db_session.execute(
             select(AuditLog).where(
                 AuditLog.entity_type == "planned_payment",
+                AuditLog.changed_by == user.id,
             ),
         )
     ).scalars().all()

@@ -26,6 +26,7 @@ import {
 } from "@/lib/format";
 import type { ScenarioForecastResponse, DailyBalance } from "@/types/api";
 import { TrendingDown, TrendingUp, Calendar } from "lucide-react";
+import { CHART } from "@/lib/chart-colors";
 
 interface ComparisonViewProps {
   data: ScenarioForecastResponse | undefined;
@@ -221,12 +222,12 @@ export function ComparisonView({ data, isLoading }: ComparisonViewProps) {
           <ForecastChart
             title="Текущий план"
             points={data.current.balance_by_day}
-            color="hsl(var(--primary))"
+            color={CHART.current}
           />
           <ForecastChart
             title="По сценарию"
             points={data.scenario.balance_by_day}
-            color="hsl(var(--success))"
+            color={CHART.scenario}
           />
         </div>
         <DiffSummary data={data} />
@@ -247,14 +248,14 @@ export function ComparisonView({ data, isLoading }: ComparisonViewProps) {
           <ForecastChart
             title="Текущий план"
             points={data.current.balance_by_day}
-            color="hsl(var(--primary))"
+            color={CHART.current}
           />
         </TabsContent>
         <TabsContent value="scenario">
           <ForecastChart
             title="По сценарию"
             points={data.scenario.balance_by_day}
-            color="hsl(var(--success))"
+            color={CHART.scenario}
           />
         </TabsContent>
         <TabsContent value="diff">

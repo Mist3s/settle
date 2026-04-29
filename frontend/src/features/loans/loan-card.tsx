@@ -68,6 +68,12 @@ export function LoanCard({ loan }: Props) {
               <p className="font-medium">{formatMoney(loan.original_amount)}</p>
             </div>
           )}
+          {loan.current_balance != null && (
+            <div>
+              <span className="text-muted-foreground">Остаток</span>
+              <p className="font-semibold text-primary">{formatMoney(loan.current_balance)}</p>
+            </div>
+          )}
           <div>
             <span className="text-muted-foreground">Ставка</span>
             <p className="font-medium">{formatPercent(loan.interest_rate)}</p>

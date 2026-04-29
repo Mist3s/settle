@@ -6,17 +6,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recha
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDebtByCreditor } from "./hooks";
 import { formatMoneyCompact } from "@/lib/format";
-
-const COLORS = [
-  "hsl(var(--primary))",
-  "hsl(var(--success))",
-  "hsl(var(--warning))",
-  "hsl(var(--danger))",
-  "hsl(270, 50%, 60%)",
-  "hsl(200, 60%, 50%)",
-  "hsl(340, 60%, 55%)",
-  "hsl(160, 50%, 45%)",
-];
+import { CHART_PALETTE } from "@/lib/chart-colors";
 
 export function DebtBreakdownChart() {
   const data = useDebtByCreditor();
@@ -57,7 +47,7 @@ export function DebtBreakdownChart() {
                 {data.map((_, i) => (
                   <Cell
                     key={i}
-                    fill={COLORS[i % COLORS.length]}
+                    fill={CHART_PALETTE[i % CHART_PALETTE.length]}
                     stroke="var(--background)"
                     strokeWidth={2}
                   />

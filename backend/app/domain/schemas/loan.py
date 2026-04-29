@@ -82,6 +82,9 @@ class LoanResponse(BaseModel):
     payment_day: int | None = None
     created_at: datetime
     updated_at: datetime
+    # Enriched by router from latest balance snapshot.
+    current_balance: str | None = None
+    balance_date: date | None = None
 
     @classmethod
     def from_orm_model(cls, obj: object) -> "LoanResponse":

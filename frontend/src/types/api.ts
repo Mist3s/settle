@@ -106,6 +106,8 @@ export interface LoanResponse {
   payment_day: number | null;
   created_at: string;
   updated_at: string;
+  current_balance: string | null;
+  balance_date: string | null;
 }
 
 // ---------------------------------------------------------------------------

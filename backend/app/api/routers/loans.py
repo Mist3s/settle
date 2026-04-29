@@ -41,7 +41,15 @@ async def list_loans(
         session, current_user.id,
         status=loan_status, loan_type=loan_type,
     )
-    return [LoanResponse.from_orm_model(ln) for ln in loans]
+    result = []
+    for ln in loans:
+        resp = LoanResponse.from_orm_model(ln)
+        latest = await balance_service.get_latest(session, ln.id)
+        if latest is not None:
+            resp.current_balance = str(latest.current_balance)
+            resp.balance_date = latest.snapshot_date
+        result.append(resp)
+    return result
 
 
 @router.get("/{loan_id}", response_model=LoanResponse)
@@ -53,7 +61,12 @@ async def get_loan(
     loan = await loan_service.get_loan(session, current_user.id, loan_id)
     if loan is None:
         raise HTTPException(status_code=404, detail="Кредит не найден")
-    return LoanResponse.from_orm_model(loan)
+    resp = LoanResponse.from_orm_model(loan)
+    latest = await balance_service.get_latest(session, loan_id)
+    if latest is not None:
+        resp.current_balance = str(latest.current_balance)
+        resp.balance_date = latest.snapshot_date
+    return resp
 
 
 @router.post("", response_model=LoanResponse, status_code=status.HTTP_201_CREATED)

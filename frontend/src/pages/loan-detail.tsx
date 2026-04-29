@@ -80,6 +80,17 @@ export function LoanDetailPage() {
                       <p className="font-semibold">{formatMoney(loan.original_amount)}</p>
                     </div>
                   )}
+                  {loan.current_balance != null && (
+                    <div>
+                      <span className="text-muted-foreground text-xs">Текущий остаток</span>
+                      <p className="font-semibold text-lg text-primary">{formatMoney(loan.current_balance)}</p>
+                      {loan.balance_date && (
+                        <span className="text-muted-foreground text-[10px]">
+                          на {formatDate(loan.balance_date)}
+                        </span>
+                      )}
+                    </div>
+                  )}
                   <div>
                     <span className="text-muted-foreground text-xs">Ставка</span>
                     <p className="font-semibold">{formatPercent(loan.interest_rate)}</p>
