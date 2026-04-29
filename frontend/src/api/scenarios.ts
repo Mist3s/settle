@@ -53,6 +53,15 @@ export async function deleteScenario(id: string): Promise<void> {
 
 // -- Scenario Actions -------------------------------------------------------
 
+export async function getActions(
+  scenarioId: string,
+): Promise<ScenarioActionResponse[]> {
+  const { data } = await client.get<ScenarioActionResponse[]>(
+    `/scenarios/${scenarioId}/actions`,
+  );
+  return data;
+}
+
 export async function addAction(
   scenarioId: string,
   action: ScenarioActionCreate,

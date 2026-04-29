@@ -113,6 +113,19 @@ async def delete_scenario(
 # --- Actions ---
 
 
+async def list_actions(
+    session: AsyncSession,
+    user_id: uuid.UUID,
+    scenario_id: uuid.UUID,
+) -> list[ScenarioAction]:
+    s_repo = ScenarioRepository(session)
+    s = await s_repo.get(scenario_id)
+    if s is None or s.user_id != user_id:
+        return []
+    a_repo = ScenarioActionRepository(session)
+    return await a_repo.list_by_scenario(scenario_id)
+
+
 async def create_action(
     session: AsyncSession,
     user_id: uuid.UUID,

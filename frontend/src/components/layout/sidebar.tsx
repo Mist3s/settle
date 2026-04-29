@@ -10,6 +10,7 @@ import {
   Wallet,
   CalendarDays,
   History,
+  BarChart3,
   FlaskConical,
   Settings,
 } from "lucide-react";
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
   { to: "/incomes", icon: Wallet, label: "Поступления" },
   { to: "/calendar", icon: CalendarDays, label: "Календарь" },
   { to: "/history", icon: History, label: "История" },
+  { to: "/analytics", icon: BarChart3, label: "Аналитика" },
   { to: "/simulator", icon: FlaskConical, label: "Симулятор" },
   { to: "/settings", icon: Settings, label: "Настройки" },
 ] as const;

@@ -110,6 +110,20 @@ async def delete_scenario(
 
 # --- Actions ---
 
+@router.get(
+    "/{scenario_id}/actions",
+    response_model=list[ScenarioActionResponse],
+)
+async def list_actions(
+    scenario_id: UUID,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+) -> list[ScenarioActionResponse]:
+    return await scenario_service.list_actions(
+        session, current_user.id, scenario_id,
+    )
+
+
 @router.post(
     "/{scenario_id}/actions",
     response_model=ScenarioActionResponse,

@@ -12,6 +12,7 @@ import {
   Wallet,
   CalendarDays,
   History,
+  BarChart3,
   FlaskConical,
   Settings,
   MoreHorizontal,
@@ -28,6 +29,7 @@ const PRIMARY_ITEMS = [
 ] as const;
 
 const SECONDARY_ITEMS = [
+  { to: "/analytics", icon: BarChart3, label: "Аналитика" },
   { to: "/simulator", icon: FlaskConical, label: "Симулятор" },
   { to: "/settings", icon: Settings, label: "Настройки" },
 ] as const;

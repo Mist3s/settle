@@ -209,3 +209,42 @@ export function actualPaymentTypeLabel(type: string): string {
 export function loanTypeColor(type: string): string {
   return LOAN_TYPE_COLORS[type] ?? "bg-gray-400";
 }
+
+// ---------------------------------------------------------------------------
+// Scenario labels
+// ---------------------------------------------------------------------------
+
+const SCENARIO_STATUS_LABELS: Record<string, string> = {
+  draft: "Черновик",
+  applied: "Применён",
+  archived: "Архив",
+};
+
+const SCENARIO_ACTION_TYPE_LABELS: Record<string, string> = {
+  close_early_full: "Полное досрочное",
+  prepayment_partial: "Частичное досрочное",
+  reduce_payment: "Уменьшить платёж",
+  skip: "Пропустить",
+  add_income: "Добавить доход",
+  change_payment_date: "Перенос даты",
+};
+
+export function scenarioStatusLabel(status: string): string {
+  return SCENARIO_STATUS_LABELS[status] ?? status;
+}
+
+export function scenarioActionTypeLabel(type: string): string {
+  return SCENARIO_ACTION_TYPE_LABELS[type] ?? type;
+}
+
+/**
+ * Format a day-count string like "+12 days" / "-5 days" → "+12 дн." / "−5 дн."
+ * Also handles raw number strings.
+ */
+export function formatDays(value: string | null | undefined): string {
+  if (value == null || value === "") return "—";
+  const match = value.match(/^([+-]?)(\d+)/);
+  if (!match) return value;
+  const sign = match[1] === "-" ? "−" : match[1] === "+" ? "+" : "";
+  return `${sign}${match[2]} дн.`;
+}

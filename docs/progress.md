@@ -435,3 +435,54 @@ production build проходит (1133 KB JS, 62 KB CSS).
 - 13 новых файлов, ~1840 строк новых/изменённых, 5 файлов обновлены.
 
 ---
+
+## Этап 12: Фронтенд — симулятор, аналитика, настройки
+
+**Дата:** 2026-04-29
+
+### Что вошло
+
+1. **Инфраструктура:**
+   - `lib/format.ts` — добавлены `scenarioStatusLabel()`, `scenarioActionTypeLabel()`, `formatDays()`.
+   - `components/ui/textarea.tsx` — новый shadcn/ui компонент.
+
+2. **Симулятор (7 файлов):**
+   - `features/simulator/hooks.ts` — 12 TanStack Query хуков (scenarios CRUD, actions CRUD, forecast, apply, archive).
+   - `features/simulator/scenario-list.tsx` — список сценариев с фильтром по статусу, badge, create/edit/delete.
+   - `features/simulator/scenario-form-dialog.tsx` — dialog создания/редактирования (name + base_date, zod).
+   - `features/simulator/action-card.tsx` — карточка действия с label, параметрами, edit/delete.
+   - `features/simulator/action-form-dialog.tsx` — wizard-dialog с 6 типами действий, динамическими полями.
+   - `features/simulator/comparison-view.tsx` — два AreaChart (as-is vs to-be), diff summary, responsive desktop/mobile.
+   - `pages/simulator.tsx` — двухпанельный layout (360px sidebar + chart area), mobile tabs.
+
+3. **Настройки (4 файла):**
+   - `features/settings/hooks.ts` — хуки для settings CRUD, import upload/commit, template/export download.
+   - `features/settings/settings-form.tsx` — форма key-value параметров с категориями.
+   - `features/settings/import-export-section.tsx` — шаблоны, drag-n-drop upload, dry-run report, commit, export.
+   - `pages/settings.tsx` — tabs «Параметры» / «Импорт и экспорт».
+
+4. **Аналитика (5 файлов):**
+   - `features/analytics/hooks.ts` — `usePaymentBreakdown()`, `useDebtByCreditor()`, `useOptimizer()`.
+   - `features/analytics/payment-breakdown-chart.tsx` — stacked bar по месяцам (тело vs проценты vs рассрочки).
+   - `features/analytics/debt-breakdown-chart.tsx` — donut chart разбивка по кредиторам.
+   - `features/analytics/optimizer.tsx` — таблица приоритетов (avalanche), desktop table + mobile cards.
+   - `pages/analytics.tsx` — страница аналитики.
+
+5. **Навигация:**
+   - Route `/analytics` добавлен.
+   - Sidebar + mobile nav: добавлена «Аналитика» (BarChart3).
+
+6. **Бэкенд (минорно):**
+   - `scenario_service.list_actions()` — новый метод.
+   - `GET /api/scenarios/{id}/actions` — новый эндпоинт.
+   - `api/scenarios.ts` (frontend) — `getActions()` API-функция.
+
+### Проверки
+- tsc: clean (0 errors)
+- ESLint: 0 errors, 4 warnings (known react-hook-form incompatible-library)
+- Production build: passes (1243 KB JS, 69 KB CSS)
+- Ruff (backend): all checks passed
+- Pytest: 267 passed, 2 failed (pre-existing import commit tests, unrelated)
+- 20 задач в 7 волнах, ~18 новых файлов, ~2300 строк.
+
+---

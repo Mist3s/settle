@@ -13,6 +13,7 @@ import { IncomesPage } from "@/pages/incomes";
 import { CalendarPage } from "@/pages/calendar";
 import { HistoryPage } from "@/pages/history";
 import { SimulatorPage } from "@/pages/simulator";
+import { AnalyticsPage } from "@/pages/analytics";
 import { SettingsPage } from "@/pages/settings";
 
 export const router = createBrowserRouter([
@@ -53,6 +54,10 @@ export const router = createBrowserRouter([
           {
             path: "history",
             element: <HistoryPage />,
+          },
+          {
+            path: "analytics",
+            element: <AnalyticsPage />,
           },
           {
             path: "simulator",
