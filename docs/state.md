@@ -134,9 +134,11 @@ Import-сервис разбит на пакет `services/import_/` с моду
 
 - ~~[№9] `services/export_service.py` — ревью~~ ✅
 - ~~[№10] `services/template_service.py` — ревью~~ ✅
-- [№11–13] HTTP endpoints + CLI
+- ~~[№11] `api/routers/import_data.py` — REST эндпоинты~~ ✅
+- ~~[№12] `app/main.py` — подключение роутера~~ ✅
+- [№13] `app/cli.py` — CLI команды
 - [№19–23] Integration-тесты (diff, idempotency, API)
 
 ## Следующий шаг
 
-Волна 7: HTTP endpoints (`api/routers/import_data.py`) + подключение роутера + CLI (задачи №11–13).
+Волна 7 (продолжение): CLI (`app/cli.py`, задача №13). Затем волна 8: integration-тесты.

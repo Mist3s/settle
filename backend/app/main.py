@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select, text
 
 from app.api.routers.auth import router as auth_router
+from app.api.routers.import_data import router as import_data_router
 from app.api.routers.incomes import router as incomes_router
 from app.api.routers.loans import router as loans_router
 from app.api.routers.payments import router as payments_router
@@ -126,6 +127,7 @@ app.include_router(payments_router)
 app.include_router(incomes_router)
 app.include_router(scenarios_router)
 app.include_router(settings_router)
+app.include_router(import_data_router)
 
 
 # --- Health endpoints ---
