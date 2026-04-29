@@ -306,3 +306,42 @@ Overlay-симулятор для сценарного прогнозирова�
 **Критический инвариант:** тест `test_forecast_does_not_write_to_db` — snapshot DB до и после вызова forecast endpoint, проверка идентичности (balances, planned_payments, loan status).
 
 ---
+
+## Этап 9: Фронтенд — каркас и дизайн-система (2026-04-29)
+
+Полная настройка SPA-инфраструктуры: от дизайн-системы до API-клиента и роутинга.
+
+**Дизайн-система:**
+- shadcn/ui (base-nova style) инициализирован через CLI, адаптирован к Settle palette.
+- Settle brand palette: oklch hue 260, 11 оттенков primary, 11 оттенков surface, success/warning/danger.
+- CSS-переменные для light/dark mode, sidebar, charts — всё на фирменных цветах.
+- 7 UI-компонентов (shadcn): button, card, input, label, separator, skeleton, sonner.
+
+**API-инфраструктура:**
+- `src/api/client.ts`: axios instance с JWT interceptor (mutex pattern для concurrent refresh).
+- `src/api/auth.ts`: login(), logout() — управление токенами (localStorage).
+- 6 API-модулей: loans, payments, dashboard, scenarios, settings, import-export.
+- `src/types/api.ts`: TypeScript-типы для всех Pydantic-схем бэкенда (~350 строк).
+- Vite proxy: `/api` → `http://backend:8000` для dev mode.
+
+**Состояние и навигация:**
+- Zustand: auth store (login/logout/checkAuth), UI store (sidebar toggle).
+- React Router v7: createBrowserRouter, ProtectedRoute → redirect на /login.
+- 5 маршрутов: dashboard, loans, calendar, simulator, settings.
+- Страницы-заглушки с Card-компонентами.
+
+**Layout:**
+- Sidebar (desktop ≥1024px): лого + навигация с NavLink + active state.
+- MobileNav (bottom tabs <1024px): fixed bottom bar.
+- Header (sticky): заголовок + logout.
+- AppLayout: sidebar + header + Outlet + mobile nav.
+
+**Login-страница:**
+- react-hook-form + zod валидация (email + password).
+- Settle branding (лого, название, подзаголовок).
+- Error display из auth store.
+
+**Проверки:** `tsc --noEmit` чисто, ESLint чисто, production build проходит.
+43 файла, 5632 строк новых/изменённых.
+
+---

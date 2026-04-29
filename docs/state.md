@@ -4,7 +4,7 @@
 
 ## Текущий этап
 
-**Этап 8: Симулятор сценариев (overlay)** — завершён.
+**Этап 9: Фронтенд — каркас и дизайн-система** — завершён.
 
 ## Что известно
 
@@ -59,9 +59,21 @@
   - Materializer: apply_scenario (материализация в одной транзакции), archive_scenario.
   - 3 новых эндпоинта: GET /{id}/forecast, POST /{id}/apply, POST /{id}/archive.
   - Критический тест: overlay НЕ модифицирует БД (snapshot до/после).
+- **Фронтенд каркас (этап 9, завершён):**
+  - shadcn/ui (base-nova style) + Settle brand palette (oklch hue 260, light/dark mode).
+  - Axios client с JWT refresh interceptor (mutex pattern, queued retry).
+  - Zustand: auth store (login/logout/checkAuth), UI store (sidebar).
+  - React Router v7: защищённые маршруты (ProtectedRoute), redirect на /login.
+  - Layout: Sidebar (desktop ≥1024px), MobileNav (bottom tabs <1024px), Header (sticky).
+  - Login page: react-hook-form + zod, Settle branding, error display.
+  - API-модули: loans, payments, dashboard, scenarios, settings, import-export.
+  - TypeScript types (src/types/api.ts) — зеркало всех Pydantic-схем бэкенда.
+  - UI-компоненты (shadcn): button, card, input, label, separator, skeleton, sonner.
+  - Vite proxy: /api → backend:8000 (dev mode).
+  - Hooks: useMediaQuery.
+  - Проверки: tsc --noEmit clean, ESLint clean, production build passes.
 - **Тесты:** 283 tests pass (unit + integration). Ruff clean.
 
 ## Следующий шаг
 
-Этап 9: Уведомления и напоминания (бэкенд). Предусловие — этап 7 (завершён).
-
+Этап 10: Фронтенд — экраны и интеграция (дашборд, кредиты, симулятор, настройки).
