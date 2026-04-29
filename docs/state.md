@@ -128,14 +128,15 @@ Import-сервис разбит на пакет `services/import_/` с моду
 - `services/import_/committer_payments.py` — commit incomes/schedule/actual_payments + auto-gen (277 строк)
 - `services/import_/committer.py` — facade commit_import() (101 строка)
 - `tests/integration/test_import_commit.py` — 5 integration-тестов (314 строк)
+- `domain/constants/import_export.py` — shared constants (82 строки), единый источник имён листов и колонок
 
-### Осталось (задачи из breakdown, волна 6+)
+### Осталось (задачи из breakdown, волна 7+)
 
-- [№9] `services/export_service.py` — ревью
-- [№10] `services/template_service.py` — ревью
+- ~~[№9] `services/export_service.py` — ревью~~ ✅
+- ~~[№10] `services/template_service.py` — ревью~~ ✅
 - [№11–13] HTTP endpoints + CLI
 - [№19–23] Integration-тесты (diff, idempotency, API)
 
 ## Следующий шаг
 
-Волна 6: ревью export_service.py и template_service.py (задачи №9–10).
+Волна 7: HTTP endpoints (`api/routers/import_data.py`) + подключение роутера + CLI (задачи №11–13).

@@ -186,3 +186,10 @@
 16. `services/import_/orchestrator.py` — оркестратор: run_dry_run(), commit_import(), ImportExpiredError, ImportNotFoundError (~110 строк). `__init__.py` — тонкий реэкспорт. DryRunStore.put() расширен optional key.
 
 **Тесты:** 206 pass, 0 fail. `ruff check` — clean.
+
+17. **Ревью export_service.py и template_service.py** (задачи №9–10):
+    - Создан `domain/constants/import_export.py` — единый источник истины для имён листов, колонок, REQUIRED_SHEETS, EXAMPLE_ROW_MARKER (82 строки).
+    - Устранено тройное дублирование констант (header_validator / template_service / export_service).
+    - Исправлен `_cell_value`: `isinstance(v, bool)` guard перед `hasattr(v, "value")`.
+    - Обновлены 7 файлов-потребителей (включая тесты и fixtures).
+    - 206 тестов зелёные, ruff чистый.
