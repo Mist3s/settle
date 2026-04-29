@@ -139,8 +139,10 @@ Import-сервис разбит на пакет `services/import_/` с моду
 - ~~[№13] `app/cli.py` — CLI команды~~ ✅ (166 строк, argparse)
 - ~~[№19] `tests/integration/test_import_diff.py`~~ ✅ (7 тестов, 370 строк)
 - ~~[№20] `tests/integration/test_import_commit.py`~~ ✅ (9 тестов, 650 строк)
-- [№21–23] Integration-тесты (idempotency, API)
+- ~~[№21] `tests/integration/test_import_idempotency.py`~~ ✅ (3 теста, 242 строки)
+- [№22] `tests/integration/test_import_api.py`
+- [№23] — уже реализовано в рамках предыдущих задач
 
 ## Следующий шаг
 
-Волна 8: integration-тесты — задача №21 (`tests/integration/test_import_idempotency.py`).
+Волна 8: integration-тесты — задача №22 (`tests/integration/test_import_api.py`).

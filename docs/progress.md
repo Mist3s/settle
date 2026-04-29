@@ -205,3 +205,5 @@
     - 206 тестов зелёные, ruff чистый.
 
 20. **Integration-тесты commit_import** (задача №20): дополнен `tests/integration/test_import_commit.py` — было 5 тестов (только counters), стало 9: добавлена проверка состояния БД (все 6 сущностей), audit UPDATE с before/after state, audit на cancel pending (status pending→cancelled), auto-gen из latest balance, транзакционный rollback при ошибке в actual_payments. 211 тестов зелёные, ruff чистый.
+
+21. **Integration-тесты idempotency** (задача №21, §14.3 critical): `tests/integration/test_import_idempotency.py` — 3 теста (242 строки): двойной прогон идентичного XLSX → counts и export совпадают; roundtrip export→re-import→compare; частичный update (одна строка изменена → обновляется только она). 214 тестов зелёные, ruff чистый.
