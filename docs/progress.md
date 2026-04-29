@@ -154,3 +154,21 @@
 **Ограничения:**
 - `recalc-schedule` — read-only preview, не обновляет planned_payments в DB.
 - `solve_for_n` использует `float` для `math.log` — это количество месяцев, не денежная величина, документировано и исключено из float-сканера.
+
+---
+
+## Этап 6: Импорт и экспорт данных (в работе)
+
+**Дата начала:** 2026-04-29
+
+**Что сделано:**
+
+1. `domain/schemas/import_dto.py` — 6 DTO моделей для листов XLSX (221 строка).
+2. `services/export_service.py` — экспорт текущего состояния БД в XLSX (212 строк).
+3. `services/template_service.py` — генерация пустого/example шаблона (118 строк).
+4. `domain/schemas/import_report.py` — 7 Pydantic-моделей dry-run отчёта (92 строки): `ImportSeverity`, `ImportError`, `ImportWarning`, `EntityDiff`, `ScheduleDiff`, `DryRunSummary`, `DryRunReport`.
+5. Декомпозиция на 23 atomic-задачи в 8 волнах (`docs/notes/stage6_breakdown.md`).
+
+**Тесты:** 92 pass, 0 fail. `ruff check` — clean.
+
+**Статус:** волна 1 частично завершена (№5 done), далее №1, №2, №23.
