@@ -270,3 +270,39 @@
 - Background jobs создают собственные сессии (не используют test rollback), поэтому тестируются inline логикой.
 
 ---
+
+## Этап 8: Симулятор сценариев (overlay)
+
+**Дата:** 2026-04-29
+
+### Реализация
+
+Overlay-симулятор для сценарного прогнозирования — полный бэкенд.
+
+**Пакет `services/simulation/` (5 модулей):**
+- `projected_state.py` (~120 строк): dataclasses ProjectedPayment, ProjectedIncome, ProjectedLoan, ProjectedState с deep-copy и filtering helpers.
+- `actions.py` (~260 строк): чистые функции для 6 типов действий (close_early_full, prepayment_partial, reduce_payment, skip, add_income, change_payment_date) + dispatcher apply_action.
+- `engine.py` (~245 строк): загрузка DB→ProjectedState, вычисление as-is/to-be daily balance, diff.
+- `materializer.py` (~215 строк): apply_scenario (материализация через PaymentService/IncomeService), archive_scenario.
+- `__init__.py`: реэкспорт.
+
+**Pydantic-схемы (`domain/schemas/simulation.py`, ~140 строк):**
+- Params validators для каждого ScenarioActionType (JSONB validation).
+- ScenarioForecastResponse: ProjectionData (balance_by_day + payments), ScenarioForecastDiff.
+
+**API (расширение `api/routers/scenarios.py`):**
+- `GET /{id}/forecast?from=&to=&starting_balance=` — as-is + to-be + diff.
+- `POST /{id}/apply` — материализация в одной транзакции.
+- `POST /{id}/archive` — архивация сценария.
+
+**Ключевые решения:**
+- Overlay в памяти (ProjectedState), не в отдельных DB таблицах. DB не модифицируется при forecast.
+- Пересчёт графика в overlay использует те же чистые функции ScheduleService.
+- Materializer: close_early_full берёт полный баланс из balance_service.get_latest.
+- Income code при материализации: `SC_{scenario_hex}_{action_hex}` для уникальности.
+
+**Тесты:** 283 (41 новый — 16 unit + 10 integration forecast + 15 integration apply), все зелёные. Ruff чистый.
+
+**Критический инвариант:** тест `test_forecast_does_not_write_to_db` — snapshot DB до и после вызова forecast endpoint, проверка идентичности (balances, planned_payments, loan status).
+
+---
