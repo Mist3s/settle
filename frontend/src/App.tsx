@@ -1,17 +1,29 @@
-function App() {
-  return (
-    <div className="flex items-center justify-center min-h-dvh bg-surface-50">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-primary-600 mb-2">Settle</h1>
-        <p className="text-surface-600 text-lg">
-          Персональный трекер долгов и платежей
-        </p>
-        <p className="text-surface-400 text-sm mt-4">
-          Каркас готов. Следующий этап — доменная модель.
-        </p>
-      </div>
-    </div>
-  )
-}
+/**
+ * Root application component.
+ *
+ * Sets up:
+ * - RouterProvider for navigation
+ * - Sonner toaster for notifications
+ * - Auth initialization on mount
+ */
 
-export default App
+import { useEffect } from "react";
+import { RouterProvider } from "react-router-dom";
+import { Toaster } from "@/components/ui/sonner";
+import { useAuthStore } from "@/stores/auth";
+import { router } from "@/routes";
+
+export default function App() {
+  const checkAuth = useAuthStore((s) => s.checkAuth);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  return (
+    <>
+      <RouterProvider router={router} />
+      <Toaster position="top-right" richColors closeButton />
+    </>
+  );
+}
