@@ -4,11 +4,10 @@
 
 ## Текущий этап
 
-**Этап 1: Каркас проекта и инфраструктура** — завершён.
+**Этап 2: Доменная модель и миграции** — завершён.
+**Этап 3: Аутентификация и безопасность** — завершён.
 
-Следующий — **Этап 2: Доменная модель и миграции** (зависит от 1)
-и **Этап 3: Аутентификация и безопасность** (зависит от 1).
-Этапы 2 и 3 могут выполняться параллельно.
+Следующий — **Этап 4: Репозитории и базовый CRUD** (зависит от 2 и 3).
 
 ## Что известно
 
@@ -20,7 +19,11 @@
 - Backend: pydantic-settings, async SQLAlchemy, structlog JSON, Alembic (async env.py), health endpoints.
 - Frontend: Vite + React + TS (strict), Tailwind 4, TanStack Query, path alias @/.
 - CI: GitHub Actions (lint + test backend, tsc + build frontend).
+- **Доменная модель:** 10 ORM-моделей (users, loans, loan_balances, incomes, planned_payments, actual_payments, scenarios, scenario_actions, settings, audit_log), 12 PG enum-типов, все индексы/constraints из архитектуры.
+- **Миграция:** `001_initial_schema` с явным lifecycle PG enum типов. upgrade/downgrade/upgrade проходят чисто.
+- **Аутентификация:** JWT RS256 (access 15 мин, refresh 30 дней), argon2id хеширование, seed user из .env, RFC 7807 error format, `extra='forbid'` на request-схемах.
+- **Health ready:** проверяет подключение к БД (SELECT 1).
 
 ## Следующий шаг
 
-Начать этап 2 (доменная модель и миграции) или этап 3 (auth).
+Начать этап 4 (репозитории и CRUD).

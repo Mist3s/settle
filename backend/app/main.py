@@ -6,10 +6,38 @@ from collections.abc import AsyncGenerator
 
 import structlog
 from fastapi import FastAPI, Request, Response
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from sqlalchemy import select, text
 
 from app.core.config import settings
+from app.core.database import async_session_factory, get_session
 from app.core.logging import setup_logging
+from app.core.security import hash_password
+from app.domain.models.user import User
+from app.api.routers.auth import router as auth_router
+
+
+async def _seed_user() -> None:
+    """Create the seed user from .env if not already present (idempotent)."""
+    log = structlog.get_logger()
+    async with async_session_factory() as session:
+        result = await session.execute(
+            select(User).where(User.email == settings.seed_user_email)
+        )
+        existing = result.scalar_one_or_none()
+        if existing is not None:
+            log.info("seed_user_exists", email=settings.seed_user_email)
+            return
+
+        user = User(
+            email=settings.seed_user_email,
+            password_hash=hash_password(settings.seed_user_password),
+        )
+        session.add(user)
+        await session.commit()
+        log.info("seed_user_created", email=settings.seed_user_email, user_id=str(user.id))
 
 
 @asynccontextmanager
@@ -18,6 +46,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     setup_logging()
     log = structlog.get_logger()
     log.info("settle_starting", version="0.1.0")
+
+    # Seed the default user
+    await _seed_user()
+
     yield
     log.info("settle_shutting_down")
 
@@ -53,6 +85,39 @@ async def request_id_middleware(request: Request, call_next) -> Response:  # typ
     return response
 
 
+# --- RFC 7807 error handling ---
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    """Convert Pydantic validation errors to RFC 7807 format."""
+    errors = []
+    for err in exc.errors():
+        field = ".".join(str(loc) for loc in err["loc"] if loc != "body")
+        errors.append({
+            "field": field,
+            "code": err["type"],
+            "message": err["msg"],
+        })
+    return JSONResponse(
+        status_code=422,
+        content={
+            "type": "https://errors.settle/validation",
+            "title": "Ошибка валидации",
+            "status": 422,
+            "detail": f"Обнаружено ошибок: {len(errors)}",
+            "instance": str(request.url.path),
+            "errors": errors,
+        },
+    )
+
+
+# --- Routers ---
+
+app.include_router(auth_router)
+
+
 # --- Health endpoints ---
 
 @app.get("/api/health/live", tags=["health"])
@@ -63,8 +128,15 @@ async def health_live() -> dict[str, str]:
 
 @app.get("/api/health/ready", tags=["health"])
 async def health_ready() -> dict[str, str]:
-    """Readiness probe — app can serve requests.
+    """Readiness probe — checks DB connection."""
+    from app.core.database import engine
 
-    Full DB check will be added when database models are in place (stage 2).
-    """
-    return {"status": "ok"}
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+        return {"status": "ok"}
+    except Exception:
+        return JSONResponse(  # type: ignore[return-value]
+            status_code=503,
+            content={"status": "unavailable", "detail": "Нет подключения к БД"},
+        )
