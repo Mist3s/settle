@@ -30,7 +30,7 @@
   - `payment_service.py`: register_payment (полная цепочка: тип → actual → баланс → график → planned status → audit).
   - `GET /api/loans/{id}/schedule`, `POST /api/loans/{id}/recalc-schedule`.
   - Float-сканер тест.
-- **Тесты:** 92 tests pass (unit + integration). Ruff clean.
+- **Тесты:** 120 tests pass (unit + integration). Ruff clean.
 
 ## Этап 6: что готово
 
@@ -51,6 +51,9 @@
 - `services/export_service.py` — экспорт в XLSX (212 строк)
 - `services/template_service.py` — генерация шаблона (118 строк)
 - `services/import_/storage.py` — DryRunStore: in-memory TTL хранилище (64 строки) + 6 unit-тестов
+- `services/import_/header_validator.py` — валидация заголовков листов (107 строк) + 11 unit-тестов
+- `tests/fixtures/import_fixtures.py` — фабрики тестовых XLSX (159 строк)
+- `services/import_/parser.py` — parse_workbook XLSX→DTO (205 строк) + 10 unit-тестов
 
 ### Осталось (23 atomic-задачи, 8 волн)
 
@@ -108,5 +111,5 @@ Import-сервис разбит на пакет `services/import_/` с моду
 
 ## Следующий шаг
 
-Продолжить волну 1 по [stage6_breakdown.md](notes/stage6_breakdown.md):
-`header_validator.py`, `import_fixtures.py`.
+Волна 2 по [stage6_breakdown.md](notes/stage6_breakdown.md):
+`cross_validator.py` (задача №4).
