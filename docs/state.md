@@ -102,8 +102,7 @@
   - Prometheus: `prometheus-fastapi-instrumentator` на `/metrics` + 3 кастомных метрики (§13.2).
   - Health ready: проверка DB + alembic_version (§13.3).
   - Docker healthcheck: `/api/health/ready`.
-- **Тесты:** 303 tests pass (unit + integration). Ruff clean.
-  - 7 pre-existing failures: 4 auth (seed user not in test transaction), 2 import commit, 1 import idempotency.
+- **Тесты:** 310 tests pass (unit + integration), 0 failures. Ruff clean.
 
 ## Следующий шаг
 
