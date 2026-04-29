@@ -100,11 +100,16 @@ async def forecast_balance_by_day(
         d = row.due_date
         payments_by_date[d] = payments_by_date.get(d, Decimal("0")) + row.amount
 
-    # Walk day by day
+    # Walk day by day.
+    # On income days, reset balance to 0 first so each salary period
+    # is independent — no carry-over from previous period.
     points: list[DailyBalance] = []
     current = from_date
     while current <= to_date:
-        balance += incomes_by_date.get(current, Decimal("0"))
+        day_income = incomes_by_date.get(current, Decimal("0"))
+        if day_income > 0:
+            balance = Decimal("0")
+        balance += day_income
         balance -= payments_by_date.get(current, Decimal("0"))
         points.append(DailyBalance.from_values(current, balance))
         current += timedelta(days=1)
