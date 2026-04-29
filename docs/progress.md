@@ -194,6 +194,8 @@
     - Обновлены 7 файлов-потребителей (включая тесты и fixtures).
     - 206 тестов зелёные, ruff чистый.
 
+19. **Integration-тесты build_diff** (задача №19): дополнен `tests/integration/test_import_diff.py` — добавлен `test_diff_usd_to_rub_via_db_setting` (USD→RUB fallback через таблицу settings). Итого 7 тестов, покрытие по breakdown полное. 207 тестов зелёные, ruff чистый.
+
 18. **HTTP-роутер import/export** (задачи №11–12):
     - `api/routers/import_data.py` — 4 эндпоинта: `POST /api/import/excel` (multipart dry-run), `POST /api/import/excel/commit` (commit с 410 Gone при TTL), `GET /api/import/template` (XLSX-шаблон), `GET /api/export/excel` (XLSX-экспорт с `since`). 154 строки, тонкий HTTP-слой.
     - `_CommitRequest` — Pydantic-модель с `extra='forbid'`.

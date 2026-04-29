@@ -137,8 +137,9 @@ Import-сервис разбит на пакет `services/import_/` с моду
 - ~~[№11] `api/routers/import_data.py` — REST эндпоинты~~ ✅
 - ~~[№12] `app/main.py` — подключение роутера~~ ✅
 - ~~[№13] `app/cli.py` — CLI команды~~ ✅ (166 строк, argparse)
-- [№19–23] Integration-тесты (diff, idempotency, API)
+- ~~[№19] `tests/integration/test_import_diff.py`~~ ✅ (7 тестов, 370 строк)
+- [№20–23] Integration-тесты (commit, idempotency, API)
 
 ## Следующий шаг
 
-Волна 8: integration-тесты (задачи №19–23).
+Волна 8: integration-тесты — задача №20 (`tests/integration/test_import_commit.py`).
