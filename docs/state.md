@@ -4,9 +4,9 @@
 
 ## Текущий этап
 
-**Этап 4: Репозитории и базовый CRUD** — завершён.
+**Этап 5: Расчётный движок** — завершён.
 
-Следующий — **Этап 5: Импорт данных** (зависит от 4).
+Следующий — **Этап 6: Импорт и экспорт данных** (зависит от 5).
 
 ## Что известно
 
@@ -26,8 +26,14 @@
 - **Pydantic-схемы:** all entities, `extra='forbid'`, Decimal as string.
 - **REST API:** /api/loans, /api/payments/{planned,actual}, /api/incomes, /api/scenarios (+actions), /api/settings.
 - **Audit log:** model_to_dict (column-only, no lazy-load), record() для каждой мутации.
-- **Тесты:** 57 tests pass (integration + unit).
+- **Расчётный движок:**
+  - `schedule_service.py`: generate_schedule (аннуитет), recalculate_after_prepayment (обе стратегии), solve_for_n.
+  - `balance_service.py`: get_latest, create_snapshot, calculate_new_principal.
+  - `payment_service.py`: register_payment (полная цепочка: тип → actual → баланс → график → planned status → audit).
+  - `GET /api/loans/{id}/schedule`, `POST /api/loans/{id}/recalc-schedule`.
+  - Float-сканер тест.
+- **Тесты:** 92 tests pass (unit + integration). Ruff clean.
 
 ## Следующий шаг
 
-Начать этап 5 (импорт данных).
+Начать этап 6 (импорт и экспорт данных).

@@ -102,3 +102,55 @@
 **Решённые проблемы:**
 - `MissingGreenlet` при серлизации ORM → Pydantic: `session.refresh()` после flush + `__dict__` в model_to_dict.
 - Архитектурное соблюдение: бизнес-логика строго в services, роутеры тонкие.
+
+---
+
+## Этап 5: Расчётный движок
+
+**Дата:** 2026-04-29
+
+**Что сделано:**
+
+1. **ScheduleService** (`services/schedule_service.py`): чистые функции, без DB.
+   - `generate_schedule()` — аннуитетный график с корректировкой последнего платежа.
+   - `recalculate_after_prepayment()` — обе стратегии (`reduce_payment`, `shorten_term`).
+   - `solve_for_n()` — решение для кол-ва месяцев при фиксированном аннуитете.
+   - Обработка `payment_day` с clamping на последний день месяца.
+   - Zero-rate shortcut для рассрочек/сплит.
+
+2. **BalanceService** (`services/balance_service.py`): снимки остатков.
+   - `get_latest()`, `create_snapshot()` с инвариантом `current = principal + accrued`.
+   - `calculate_new_principal()` — чистая функция для пересчёта после платежа.
+
+3. **PaymentService** (`services/payment_service.py`): полная цепочка из arch 5.2.
+   - `determine_payment_type()` — все 6 типов по соотношению сумм.
+   - `register_payment()` — создание actual → баланс → перегенерация графика → planned status → audit.
+   - `_regenerate_future_schedule()` — cancel future + generate new.
+   - `_cancel_future_planned()` — массовая отмена с audit log.
+   - Обработка early_full: баланс=0, loan.status=paid_off, все future cancelled.
+   - Обработка overpayment: excess на тело, график пересчитан.
+   - Обработка underpayment: planned.status=partial, notes с суммой.
+   - `create_actual()` сохранён для backward-compat.
+
+4. **REST API:** `GET /api/loans/{id}/schedule`, `POST /api/loans/{id}/recalc-schedule`.
+
+5. **Критические тесты (14.3):**
+   - Инвариант сходимости: sum(principal) == original (±1 коп.), 3 варианта.
+   - Обе стратегии досрочного: reduce_payment (months same, annuity↓), shorten_term (annuity same, months↓).
+   - Regular, overpayment, underpayment, missed, early_full, early_partial — интеграционные.
+   - Float-сканер: `grep -rn float( services/ domain/ repositories/` — clean.
+
+**Ключевые файлы:**
+- `backend/app/services/schedule_service.py`
+- `backend/app/services/balance_service.py`
+- `backend/app/services/payment_service.py`
+- `backend/app/domain/schemas/schedule.py`
+- `backend/app/tests/unit/test_schedule_service.py` (18 тестов)
+- `backend/app/tests/unit/test_financial_engine.py` (12 тестов)
+- `backend/app/tests/integration/test_financial_engine.py` (6 тестов)
+
+**Тесты:** 92 pass, 0 fail. `ruff check` — clean.
+
+**Ограничения:**
+- `recalc-schedule` — read-only preview, не обновляет planned_payments в DB.
+- `solve_for_n` использует `float` для `math.log` — это количество месяцев, не денежная величина, документировано и исключено из float-сканера.

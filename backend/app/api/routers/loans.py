@@ -12,7 +12,8 @@ from app.domain.enums import LoanStatus, LoanType
 from app.domain.models.user import User
 from app.domain.schemas.balance import BalanceCreate, BalanceResponse
 from app.domain.schemas.loan import LoanCreate, LoanResponse, LoanUpdate
-from app.services import loan_service
+from app.domain.schemas.schedule import ScheduleEntryResponse
+from app.services import balance_service, loan_service, schedule_service
 
 router = APIRouter(prefix="/api/loans", tags=["loans"])
 
@@ -145,3 +146,95 @@ async def create_balance(
         raise HTTPException(status_code=404, detail="Кредит не найден")
     await session.commit()
     return BalanceResponse.from_orm_model(balance)
+
+
+# ------------------------------------------------------------------
+# Schedule endpoints (Stage 5: financial engine)
+# ------------------------------------------------------------------
+
+
+def _schedule_entry_to_response(
+    entry: schedule_service.ScheduleEntry,
+) -> ScheduleEntryResponse:
+    return ScheduleEntryResponse(
+        due_date=entry.due_date,
+        amount=str(entry.amount),
+        principal_part=str(entry.principal_part),
+        interest_part=str(entry.interest_part),
+        balance_after=str(entry.balance_after),
+    )
+
+
+@router.get("/{loan_id}/schedule", response_model=list[ScheduleEntryResponse])
+async def get_schedule(
+    loan_id: UUID,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+) -> list[ScheduleEntryResponse]:
+    """Generate an annuity schedule from current loan parameters and latest balance."""
+    loan = await loan_service.get_loan(session, current_user.id, loan_id)
+    if loan is None:
+        raise HTTPException(status_code=404, detail="Кредит не найден")
+
+    latest = await balance_service.get_latest(session, loan_id)
+    if latest is None:
+        raise HTTPException(
+            status_code=422,
+            detail="Нет снимка остатка — невозможно построить график",
+        )
+
+    months = loan.months_remaining
+    if months is None or months <= 0:
+        return []
+
+    payment_day = loan.payment_day or latest.snapshot_date.day
+
+    entries = schedule_service.generate_schedule(
+        principal=latest.principal_balance,
+        annual_rate=loan.interest_rate,
+        months_remaining=months,
+        start_date=latest.snapshot_date,
+        payment_day=payment_day,
+    )
+    return [_schedule_entry_to_response(e) for e in entries]
+
+
+@router.post(
+    "/{loan_id}/recalc-schedule",
+    response_model=list[ScheduleEntryResponse],
+)
+async def recalc_schedule(
+    loan_id: UUID,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+) -> list[ScheduleEntryResponse]:
+    """Force-recalculate schedule from current balance and loan params.
+
+    This is a read-only preview — does not modify planned_payments.
+    """
+    loan = await loan_service.get_loan(session, current_user.id, loan_id)
+    if loan is None:
+        raise HTTPException(status_code=404, detail="Кредит не найден")
+
+    latest = await balance_service.get_latest(session, loan_id)
+    if latest is None:
+        raise HTTPException(
+            status_code=422,
+            detail="Нет снимка остатка — невозможно пересчитать график",
+        )
+
+    months = loan.months_remaining
+    if months is None or months <= 0:
+        return []
+
+    payment_day = loan.payment_day or latest.snapshot_date.day
+
+    entries = schedule_service.generate_schedule(
+        principal=latest.principal_balance,
+        annual_rate=loan.interest_rate,
+        months_remaining=months,
+        start_date=latest.snapshot_date,
+        payment_day=payment_day,
+    )
+    return [_schedule_entry_to_response(e) for e in entries]
+
