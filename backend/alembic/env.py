@@ -13,9 +13,10 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# ORM metadata — will be populated when models are created (stage 2)
-# For now, import nothing; Alembic just needs a target_metadata.
-target_metadata = None
+# ORM metadata — import all models to register them with Base
+from app.domain.models import Base  # noqa: E402
+
+target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
