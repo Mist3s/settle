@@ -6,7 +6,8 @@
 
 ```
 services/import_/
-├── __init__.py          # public API: run_dry_run(), commit_import()
+├── __init__.py          # thin re-exports
+├── orchestrator.py      # public API: run_dry_run(), commit_import()
 ├── parser.py            # XLSX → DTO (openpyxl)
 ├── header_validator.py  # проверка имён колонок vs спецификация
 ├── cross_validator.py   # кросс-валидация между листами (ссылочная целостность)
@@ -29,7 +30,7 @@ services/import_/
 | 7b | `services/import_/committer_loans.py` | `_commit_settings`, `_commit_loans`, `_commit_balances` | №7a, №5, №6, audit_service | M | 150–180 |
 | 7c | `services/import_/committer_payments.py` | `_commit_incomes`, `_cancel_pending_schedule`, `_commit_schedule`, `_commit_actual_payments`, `_auto_generate_schedules` | №7a, №5, №6, schedule_service, audit_service | M | 180–220 |
 | 7d | `services/import_/committer.py` | `commit_import()` facade: orchestrates 7b + 7c in order | №7a, №7b, №7c | S | 40–60 |
-| 8 | `services/import_/__init__.py` | Public API: `run_dry_run(session, user_id, file_bytes)`, `commit_import(session, user_id, import_id)`; оркестрация parse→validate→cross_validate→diff→store / store.get→commit | №1–7 | S | 60–90 |
+| 8 | `services/import_/orchestrator.py` + `__init__.py` | Public API: `run_dry_run(session, user_id, file_bytes)`, `commit_import(session, user_id, import_id)`; оркестрация parse→validate→cross_validate→diff→store / store.get→commit. `__init__.py` — тонкий реэкспорт | №1–7 | S | 60–90 |
 | 9 | `services/export_service.py` | **Уже реализован** (212 строк). Ревью + мелкие правки если нужно | — | S | — |
 | 10 | `services/template_service.py` | **Уже реализован** (118 строк). Ревью + мелкие правки если нужно | — | S | — |
 | 11 | `api/routers/import_data.py` | 4 эндпоинта: `POST /import/excel`, `POST /import/excel/commit`, `GET /import/template`, `GET /export/excel`; тонкий HTTP-слой, multipart upload | №8, №9, №10 | S | 80–120 |
@@ -80,7 +81,7 @@ services/import_/
 
 ### Волна 5: Оркестратор
 
-14. [№8] `services/import_/__init__.py` — public API пакета
+14. [№8] `services/import_/orchestrator.py` + `__init__.py` — public API пакета
 
 ### Волна 6: Ревью существующего
 
