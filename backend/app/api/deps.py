@@ -1,6 +1,5 @@
 """FastAPI dependencies: auth, database session."""
 
-from collections.abc import AsyncGenerator
 from uuid import UUID
 
 import structlog

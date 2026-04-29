@@ -6,7 +6,7 @@ Then: IntegrityError is raised with the expected constraint name
 """
 
 import uuid
-from datetime import date, datetime, UTC
+from datetime import date
 from decimal import Decimal
 
 import pytest
@@ -14,10 +14,9 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.security import hash_password
 from app.domain.enums import (
-    ActualPaymentType,
     BalanceSource,
-    IncomeStatus,
     LoanStatus,
     LoanType,
     PaymentAccuracy,
@@ -26,9 +25,7 @@ from app.domain.enums import (
     PrepaymentStrategy,
 )
 from app.domain.models import (
-    ActualPayment,
     AuditLog,
-    Income,
     Loan,
     LoanBalance,
     PlannedPayment,
@@ -37,8 +34,6 @@ from app.domain.models import (
     Setting,
     User,
 )
-from app.core.security import hash_password
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -128,7 +123,7 @@ class TestCheckConstraints:
     """Tests for CHECK constraints defined in models."""
 
     async def test_loan_negative_interest_rate_rejected(self, db_session: AsyncSession):
-        """Given: interest_rate < 0, When: flush, Then: IntegrityError ck_loans_positive_interest_rate."""
+        """Given: interest_rate < 0, When: flush, Then: IntegrityError."""
         user = _make_user()
         db_session.add(user)
         await db_session.flush()
@@ -179,7 +174,7 @@ class TestCheckConstraints:
             await db_session.flush()
 
     async def test_planned_payment_zero_amount_rejected(self, db_session: AsyncSession):
-        """Given: amount = 0, When: flush, Then: IntegrityError ck_planned_payments_positive_amount."""
+        """Given: amount = 0, When: flush, Then: IntegrityError."""
         user = _make_user()
         db_session.add(user)
         await db_session.flush()
@@ -222,7 +217,7 @@ class TestUniqueConstraints:
             await db_session.flush()
 
     async def test_duplicate_balance_snapshot_rejected(self, db_session: AsyncSession):
-        """Given: two balances for same (loan_id, snapshot_date), When: flush, Then: IntegrityError."""
+        """Given: duplicate (loan_id, snapshot_date), When: flush, Then: IntegrityError."""
         user = _make_user()
         db_session.add(user)
         await db_session.flush()

@@ -7,7 +7,7 @@ Values are lowercase strings matching the DB enum labels exactly.
 import enum
 
 
-class LoanType(str, enum.Enum):
+class LoanType(enum.StrEnum):
     CREDIT = "credit"
     INSTALLMENT = "installment"
     SPLIT = "split"
@@ -15,14 +15,14 @@ class LoanType(str, enum.Enum):
     OTHER_DEBT = "other_debt"
 
 
-class LoanStatus(str, enum.Enum):
+class LoanStatus(enum.StrEnum):
     ACTIVE = "active"
     PAID_OFF = "paid_off"
     DEFAULTED = "defaulted"
     CANCELLED = "cancelled"
 
 
-class PaymentMethod(str, enum.Enum):
+class PaymentMethod(enum.StrEnum):
     ANNUITY = "annuity"
     DIFFERENTIATED = "differentiated"
     INSTALLMENT = "installment"
@@ -30,7 +30,7 @@ class PaymentMethod(str, enum.Enum):
     ONE_TIME = "one_time"
 
 
-class PaymentStatus(str, enum.Enum):
+class PaymentStatus(enum.StrEnum):
     PENDING = "pending"
     PAID = "paid"
     PARTIAL = "partial"
@@ -39,14 +39,14 @@ class PaymentStatus(str, enum.Enum):
     OVERDUE = "overdue"
 
 
-class PaymentAccuracy(str, enum.Enum):
+class PaymentAccuracy(enum.StrEnum):
     EXACT_CONTRACT = "exact_contract"
     EXACT_SCREENSHOT = "exact_screenshot"
     CALCULATED_ANNUITY = "calculated_annuity"
     ESTIMATE = "estimate"
 
 
-class ActualPaymentType(str, enum.Enum):
+class ActualPaymentType(enum.StrEnum):
     REGULAR = "regular"
     EARLY_PARTIAL = "early_partial"
     EARLY_FULL = "early_full"
@@ -55,24 +55,24 @@ class ActualPaymentType(str, enum.Enum):
     MISSED = "missed"
 
 
-class IncomeStatus(str, enum.Enum):
+class IncomeStatus(enum.StrEnum):
     EXPECTED = "expected"
     RECEIVED = "received"
     CANCELLED = "cancelled"
 
 
-class BalanceSource(str, enum.Enum):
+class BalanceSource(enum.StrEnum):
     MANUAL = "manual"
     IMPORTED = "imported"
     CALCULATED = "calculated"
 
 
-class PrepaymentStrategy(str, enum.Enum):
+class PrepaymentStrategy(enum.StrEnum):
     REDUCE_PAYMENT = "reduce_payment"
     SHORTEN_TERM = "shorten_term"
 
 
-class ScenarioActionType(str, enum.Enum):
+class ScenarioActionType(enum.StrEnum):
     CLOSE_EARLY_FULL = "close_early_full"
     PREPAYMENT_PARTIAL = "prepayment_partial"
     REDUCE_PAYMENT = "reduce_payment"
@@ -81,13 +81,13 @@ class ScenarioActionType(str, enum.Enum):
     CHANGE_PAYMENT_DATE = "change_payment_date"
 
 
-class ScenarioStatus(str, enum.Enum):
+class ScenarioStatus(enum.StrEnum):
     DRAFT = "draft"
     APPLIED = "applied"
     ARCHIVED = "archived"
 
 
-class AuditAction(str, enum.Enum):
+class AuditAction(enum.StrEnum):
     CREATE = "create"
     UPDATE = "update"
     DELETE = "delete"

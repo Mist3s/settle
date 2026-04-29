@@ -15,15 +15,15 @@ from app.domain.models.settings import Setting
 from app.domain.models.user import User
 
 __all__ = [
+    "ActualPayment",
+    "AuditLog",
     "Base",
-    "User",
+    "Income",
     "Loan",
     "LoanBalance",
-    "Income",
     "PlannedPayment",
-    "ActualPayment",
     "Scenario",
     "ScenarioAction",
     "Setting",
-    "AuditLog",
+    "User",
 ]

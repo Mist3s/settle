@@ -5,9 +5,7 @@ When: calling /api/auth/* endpoints
 Then: correct tokens, status codes, and error responses
 """
 
-import pytest
 from httpx import AsyncClient
-
 
 # ---------------------------------------------------------------------------
 # Login
@@ -143,8 +141,9 @@ class TestAuthDependency:
 
     async def test_expired_token_format(self, client: AsyncClient):
         """Verify token structure: sub, iat, exp, type fields present."""
-        from app.core.security import create_access_token, decode_token
         import uuid
+
+        from app.core.security import create_access_token, decode_token
         user_id = str(uuid.uuid4())
         token = create_access_token(user_id)
         payload = decode_token(token)

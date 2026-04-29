@@ -5,7 +5,7 @@ from pathlib import Path
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from jose import JWTError, jwt
+from jose import jwt
 
 from app.core.config import settings
 

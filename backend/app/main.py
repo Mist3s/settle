@@ -1,8 +1,8 @@
 """FastAPI application entrypoint."""
 
 import uuid
-from contextlib import asynccontextmanager
 from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 
 import structlog
 from fastapi import FastAPI, Request, Response
@@ -11,12 +11,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import select, text
 
+from app.api.routers.auth import router as auth_router
 from app.core.config import settings
-from app.core.database import async_session_factory, get_session
+from app.core.database import async_session_factory
 from app.core.logging import setup_logging
 from app.core.security import hash_password
 from app.domain.models.user import User
-from app.api.routers.auth import router as auth_router
 
 
 async def _seed_user() -> None:
