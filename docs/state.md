@@ -4,7 +4,7 @@
 
 ## Текущий этап
 
-**Этап 7: Прогноз и дашборд (бэкенд)** — в работе. Декомпозиция: `docs/notes/stage7_breakdown.md` (12 задач, 5 волн).
+**Этап 7: Прогноз и дашборд (бэкенд)** — завершён.
 
 ## Что известно
 
@@ -20,9 +20,9 @@
 - **Миграция:** `001_initial_schema` с явным lifecycle PG enum типов.
 - **Аутентификация:** JWT RS256 (access 15 мин, refresh 30 дней), argon2id, seed user.
 - **Репозитории:** Generic Repository[Model] с soft-delete auto-filtering, refresh после каждого flush.
-- **Сервисы:** loan_service, income_service, payment_service, scenario_service, settings_service, audit_service.
+- **Сервисы:** loan_service, income_service, payment_service, scenario_service, settings_service, audit_service, forecast_service, dashboard_service.
 - **Pydantic-схемы:** all entities, `extra='forbid'`, Decimal as string.
-- **REST API:** /api/loans, /api/payments/{planned,actual}, /api/incomes, /api/scenarios (+actions), /api/settings, /api/import/*, /api/export/*.
+- **REST API:** /api/loans, /api/payments/{planned,actual}, /api/incomes, /api/scenarios (+actions), /api/settings, /api/import/*, /api/export/*, /api/dashboard, /api/forecast/balance-by-day.
 - **Audit log:** model_to_dict (column-only, no lazy-load), record() для каждой мутации.
 - **Расчётный движок:**
   - `schedule_service.py`: generate_schedule (аннуитет), recalculate_after_prepayment (обе стратегии), solve_for_n.
@@ -42,15 +42,22 @@
   - Идемпотентность по бизнес-ключам: Loan(code), Balance(loan_code+snapshot_date), Schedule(loan_code+due_date), Income(code), ActualPayment(loan_code+payment_date+amount).
   - DryRunStore: in-memory dict с TTL 30 мин, lazy GC.
   - Зависимость: python-multipart для multipart/form-data.
-- **Тесты:** 223 tests pass (unit + integration). Ruff clean.
+- **Прогноз и дашборд (этап 7, завершён):**
+  - `services/forecast_service.py` (107 строк): forecast_balance_by_day — прогноз свободных денег по дням, уважает unavailable_balance.
+  - `services/dashboard_service.py` (298 строк): get_dashboard — 4 виджета (next_payments, current_period, totals, warnings).
+  - `api/routers/dashboard.py` (66 строк): GET /api/dashboard, GET /api/forecast/balance-by-day.
+  - `tasks/scheduler.py` (66 строк): APScheduler AsyncIOScheduler в lifespan, 2 cron job.
+  - `tasks/jobs/accrue_interest.py` (87 строк): ежедневное начисление процентов (credit-type, rate>0).
+  - `tasks/jobs/refresh_status.py` (46 строк): pending → overdue для просроченных.
+  - Миграция не потребовалась — overdue уже в PG enum с миграции 001.
+- **Тесты:** 242 tests pass (unit + integration). Ruff clean.
 
 ## Следующий шаг
 
-Этап 7: Прогноз и дашборд (бэкенд). Предусловие — этап 5 (завершён).
+Этап 8: Симулятор сценариев (overlay). Предусловие — этап 5 (завершён).
 
 Что нужно:
-- `services/forecast_service.py`: `forecast_balance_by_day()` — прогноз свободных денег по дням.
-- `services/dashboard_service.py`: агрегаты для главной (ближайшие платежи, остаток на жизнь, общий долг, предупреждения).
-- Роутер `api/routers/dashboard.py`: `GET /api/dashboard`, `GET /api/forecast/balance-by-day`.
-- Фоновые задачи (APScheduler в lifespan): `accrue_interest` (ежедневно 03:00 МСК), `refresh_planned_status` (ежедневно 00:30 МСК).
-- Добавление `overdue` в enum `payment_status` (миграция).
+- Overlay-таблицы (`scenario_overlays`) для хранения виртуальных изменений.
+- Расширение scenario_service: apply_actions → overlay записи.
+- Интеграция forecast_service с overlay (scenario_id parameter).
+- Invariant: overlay НЕ пишет в основные таблицы (отдельный тест).

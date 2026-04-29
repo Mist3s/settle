@@ -237,3 +237,36 @@
 - GAP-1/GAP-2 (model_validator на LoanImportRow.original_amount и BalanceImportRow.principal_balance) — задокументированы в state.md, не критичны для работы.
 
 ---
+
+## Этап 7: Прогноз и дашборд (бэкенд) — 2026-04-29
+
+### Атомарные задачи
+
+1. ✅ Pydantic-схемы dashboard/forecast (`domain/schemas/dashboard.py`)
+2. ✅ ForecastService (`services/forecast_service.py`) — прогноз баланса по дням (§5.3)
+3. ✅ DashboardService (`services/dashboard_service.py`) — агрегаты дашборда (§8.2)
+4. ✅ Dashboard router (`api/routers/dashboard.py`) — `GET /api/dashboard`, `GET /api/forecast/balance-by-day`
+5. ✅ APScheduler (`tasks/scheduler.py`) — два cron job в lifespan
+6. ✅ Job: accrue_interest (`tasks/jobs/accrue_interest.py`) — ежедневное начисление процентов
+7. ✅ Job: refresh_planned_status (`tasks/jobs/refresh_status.py`) — pending → overdue
+8. ✅ Integration-тесты dashboard + forecast (19 тестов)
+9. ✅ Integration-тесты background jobs
+
+### Обзор
+
+**Ключевые модули:**
+- `forecast_service.py` (107 строк): прогноз «свободных денег» по дням. Читает incomes и pending payments в диапазоне, уважает `unavailable_balance` из settings.
+- `dashboard_service.py` (298 строк): единый `get_dashboard()` — 4 виджета (next_payments, current_period, totals, warnings). Injectable `today` для тестирования.
+- `scheduler.py` (66 строк): APScheduler AsyncIOScheduler с двумя cron-задачами (03:00 и 00:30 МСК).
+- `accrue_interest.py` (87 строк): ежедневный расчёт процентов для credit-type активных займов.
+- `refresh_status.py` (46 строк): bulk UPDATE pending→overdue для просроченных.
+
+**Тесты:** 242 (19 новых), все зелёные. Ruff чистый.
+
+**Миграция:** Не потребовалась — `overdue` уже в PG enum и Python enum с миграции 001.
+
+**Известные ограничения:**
+- `month_to_month_change` в totals = "0.00" (placeholder до накопления исторических balance данных через accrue_interest job).
+- Background jobs создают собственные сессии (не используют test rollback), поэтому тестируются inline логикой.
+
+---
