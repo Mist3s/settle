@@ -27,6 +27,20 @@ from app.domain.schemas.dashboard import (
     NextPayment,
 )
 
+_MONTHS_RU = {
+    1: "января", 2: "февраля", 3: "марта", 4: "апреля",
+    5: "мая", 6: "июня", 7: "июля", 8: "августа",
+    9: "сентября", 10: "октября", 11: "ноября", 12: "декабря",
+}
+
+
+def _fmt_date_ru(d: date) -> str:
+    return f"{d.day} {_MONTHS_RU[d.month]}"
+
+
+def _fmt_money(amount: Decimal) -> str:
+    return f"{amount:,.2f}".replace(",", " ").replace(".", ",")
+
 
 async def _get_setting_value(
     session: AsyncSession,
@@ -285,7 +299,10 @@ async def _warnings(
     for r in overdue_rows:
         warnings.append(DashboardWarning(
             type="overdue_payment",
-            message=f"Просрочен платёж: {r.loan_name} — {r.amount} ₽ ({r.due_date})",
+            message=(
+                f"Просрочен платёж: {r.loan_name} — "
+                f"{_fmt_money(r.amount)} ₽ ({_fmt_date_ru(r.due_date)})"
+            ),
         ))
 
     # 2. Fixed-date payments coming soon (can_pay_early=False within 7 days)
@@ -313,8 +330,8 @@ async def _warnings(
         warnings.append(DashboardWarning(
             type="fixed_date_payment",
             message=(
-                f"{r.due_date.strftime('%d %B')} — {r.loan_name} "
-                f"{r.amount} ₽, нельзя погасить заранее"
+                f"{_fmt_date_ru(r.due_date)} — {r.loan_name} "
+                f"{_fmt_money(r.amount)} ₽, нельзя погасить заранее"
             ),
         ))
 
