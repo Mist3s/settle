@@ -1,8 +1,8 @@
 /**
  * Dashboard page — main landing screen.
  *
- * Widgets: NextPayments, CurrentPeriod, Totals, Warnings, ForecastChart.
- * Responsive: 1 col (mobile) → 2 col (tablet) → 3 col (desktop).
+ * Widgets: NextPayments, CurrentPeriod (1–2 salary periods), Totals,
+ * Warnings, ForecastChart.
  */
 
 import { useDashboard } from "@/features/dashboard/hooks";
@@ -29,26 +29,22 @@ export function DashboardPage() {
       >
         {data && (
           <>
-            {/* Top row: period + totals widgets */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Metric widgets */}
+            <div className="grid gap-4 sm:grid-cols-2">
               <NextPaymentsWidget payments={data.next_payments} />
-              <CurrentPeriodWidget period={data.current_period} />
-              {data.next_period ? (
-                <CurrentPeriodWidget period={data.next_period} />
-              ) : (
-                <TotalsWidget totals={data.totals} />
-              )}
+              <TotalsWidget totals={data.totals} />
             </div>
-            {data.next_period && (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <TotalsWidget totals={data.totals} />
-              </div>
-            )}
+
+            {/* Salary periods — one card, two columns inside */}
+            <CurrentPeriodWidget
+              current={data.current_period}
+              next={data.next_period}
+            />
 
             {/* Warnings */}
             <WarningsWidget warnings={data.warnings} />
 
-            {/* Forecast chart — uses remaining_for_living as starting balance */}
+            {/* Forecast chart */}
             <ForecastChart
               startingBalance={data.current_period.remaining_for_living}
             />
