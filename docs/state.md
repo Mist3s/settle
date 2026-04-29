@@ -50,6 +50,7 @@
 - `domain/schemas/import_report.py` — 7 Pydantic-моделей dry-run отчёта (92 строки)
 - `services/export_service.py` — экспорт в XLSX (212 строк)
 - `services/template_service.py` — генерация шаблона (118 строк)
+- `services/import_/storage.py` — DryRunStore: in-memory TTL хранилище (64 строки) + 6 unit-тестов
 
 ### Осталось (23 atomic-задачи, 8 волн)
 
@@ -57,6 +58,7 @@ Import-сервис разбит на пакет `services/import_/` с моду
 `storage`, `header_validator`, `parser`, `cross_validator`, `diff`, `committer`, `__init__`.
 
 Полный перечень задач, зависимостей и порядок — в stage6_breakdown.md.
+
 
 ## Ключевые факты для реализации (VERIFIED)
 
@@ -107,4 +109,4 @@ Import-сервис разбит на пакет `services/import_/` с моду
 ## Следующий шаг
 
 Продолжить волну 1 по [stage6_breakdown.md](notes/stage6_breakdown.md):
-`storage.py`, `header_validator.py`, `import_fixtures.py`.
+`header_validator.py`, `import_fixtures.py`.

@@ -168,7 +168,8 @@
 3. `services/template_service.py` — генерация пустого/example шаблона (118 строк).
 4. `domain/schemas/import_report.py` — 7 Pydantic-моделей dry-run отчёта (92 строки): `ImportSeverity`, `ImportError`, `ImportWarning`, `EntityDiff`, `ScheduleDiff`, `DryRunSummary`, `DryRunReport`.
 5. Декомпозиция на 23 atomic-задачи в 8 волнах (`docs/notes/stage6_breakdown.md`).
+6. `services/import_/storage.py` — DryRunStore: in-memory dict с TTL 30 мин, lazy GC (64 строки). + 6 unit-тестов.
 
-**Тесты:** 92 pass, 0 fail. `ruff check` — clean.
+**Тесты:** 98 pass, 0 fail. `ruff check` — clean.
 
-**Статус:** волна 1 частично завершена (№5 done), далее №1, №2, №23.
+**Статус:** волна 1 частично завершена (№5, №1 done), далее №2, №23.
