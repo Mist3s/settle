@@ -55,6 +55,19 @@
 - `tests/fixtures/import_fixtures.py` — фабрики тестовых XLSX (159 строк)
 - `services/import_/parser.py` — parse_workbook XLSX→DTO (205 строк) + 10 unit-тестов
 - `services/import_/cross_validator.py` — кросс-валидация между листами (160 строк) + 16 unit-тестов
+- `tests/unit/test_import_dto.py` — 59 unit-тестов на хелперы и 6 DTO моделей (302 строки)
+
+### Обнаруженные gap'ы в import_dto.py
+
+> **GAP-1: `LoanImportRow.original_amount` — нет валидации обязательности для credit/installment.**
+> В задаче указано: `original_amount` обязательно для `credit`/`installment`, опционально для `utilities`/`other_debt`.
+> В DTO поле `Optional` без `model_validator`. В `cross_validator.py` тоже нет такой проверки.
+> **Предложение:** добавить `model_validator` в `LoanImportRow` отдельным коммитом.
+
+> **GAP-2: `BalanceImportRow.principal_balance` — нет default = current_balance.**
+> В задаче указано: если `principal_balance` не задан, он должен равняться `current_balance`.
+> В DTO `principal_balance: Decimal | None = None` без `model_validator`.
+> **Предложение:** добавить `model_validator` в `BalanceImportRow` отдельным коммитом.
 
 ### Осталось (23 atomic-задачи, 8 волн)
 
@@ -112,6 +125,5 @@ Import-сервис разбит на пакет `services/import_/` с моду
 
 ## Следующий шаг
 
-Волна 3 по [stage6_breakdown.md](notes/stage6_breakdown.md):
-unit-тесты DTO (`test_import_dto.py`, задача №14).
-Или задачи №6/7 (diff.py / committer.py) из волны 4.
+Волна 3 (остаток): задачи №15–18 (unit-тесты header_validator, cross_validator, storage, parser).
+Или волна 4: задачи №6/7 (diff.py / committer.py).
