@@ -2,7 +2,7 @@
 
 Usage::
 
-    from app.tests.fixtures.import_fixtures import (
+    from tests.fixtures.import_fixtures import (
         build_workbook,
         make_loan_row,
         make_balance_row,

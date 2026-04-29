@@ -8,6 +8,7 @@ Then: IntegrityError is raised with the expected constraint name
 import uuid
 from datetime import date
 from decimal import Decimal
+from typing import ClassVar
 
 import pytest
 from sqlalchemy import text
@@ -71,7 +72,7 @@ def _make_loan(user_id: uuid.UUID, **overrides) -> Loan:
 class TestEnumTypesExist:
     """Given: migration applied, When: querying pg_type, Then: all 12 enum types exist."""
 
-    EXPECTED_ENUMS = {
+    EXPECTED_ENUMS: ClassVar[set[str]] = {
         "loan_type", "loan_status", "payment_method", "payment_status",
         "payment_accuracy", "actual_payment_type", "income_status",
         "balance_source", "prepayment_strategy", "scenario_action_type",
@@ -97,7 +98,7 @@ class TestEnumTypesExist:
 class TestTablesExist:
     """Given: migration applied, When: querying information_schema, Then: all tables exist."""
 
-    EXPECTED_TABLES = {
+    EXPECTED_TABLES: ClassVar[set[str]] = {
         "users", "loans", "loan_balances", "incomes",
         "planned_payments", "actual_payments", "scenarios",
         "scenario_actions", "settings", "audit_log",

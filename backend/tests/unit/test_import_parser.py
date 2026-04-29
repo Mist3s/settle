@@ -12,7 +12,7 @@ from app.services.import_.parser import (
     ParsedData,
     parse_workbook,
 )
-from app.tests.fixtures.import_fixtures import (
+from tests.fixtures.import_fixtures import (
     build_workbook,
     make_actual_payment_row,
     make_balance_row,

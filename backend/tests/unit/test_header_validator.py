@@ -1,13 +1,12 @@
 """Unit tests for services/import_/header_validator.py."""
 
-from app.domain.schemas.import_report import ImportError
+from app.domain.schemas.import_report import ImportError as ImportErrorSchema
 from app.services.import_.header_validator import (
     REQUIRED_SHEETS,
     SHEET_COLUMNS,
     validate_headers,
     validate_required_sheets,
 )
-
 
 # ---------------------------------------------------------------------------
 # validate_headers
@@ -29,7 +28,7 @@ class TestValidateHeaders:
         assert errors[0].sheet == "Settings"
 
     def test_extra_columns(self) -> None:
-        cols = list(SHEET_COLUMNS["Settings"]) + ["foo", "bar"]
+        cols = [*SHEET_COLUMNS["Settings"], "foo", "bar"]
         errors = validate_headers("Settings", cols)
         assert len(errors) == 1
         assert "Лишние колонки" in errors[0].message
@@ -60,7 +59,7 @@ class TestValidateHeaders:
 
     def test_returns_import_error_type(self) -> None:
         errors = validate_headers("Settings", ["key"])
-        assert all(isinstance(e, ImportError) for e in errors)
+        assert all(isinstance(e, ImportErrorSchema) for e in errors)
 
 
 # ---------------------------------------------------------------------------
