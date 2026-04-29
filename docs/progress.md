@@ -345,3 +345,44 @@ Overlay-симулятор для сценарного прогнозирова�
 43 файла, 5632 строк новых/изменённых.
 
 ---
+
+## Этап 10: Фронтенд — дашборд и кредиты (2026-04-29)
+
+### Инфраструктура
+
+- `src/lib/format.ts` — утилиты форматирования (money, date, percent, delta, labels).
+- 7 shadcn/ui компонентов (badge, dialog, select, table, tabs, tooltip, progress).
+- `LoadingState` — переиспользуемая обёртка для skeleton/error/empty.
+- `TooltipProvider` wrapper в main.tsx.
+
+### Дашборд (features/dashboard/)
+
+- `hooks.ts` — TanStack Query: useDashboard, useForecast.
+- 4 виджета: NextPayments (urgency color), CurrentPeriod (traffic-light),
+  Totals (delta с цветом), Warnings (feed с иконками).
+- `ForecastChart` — Recharts AreaChart с gradient fill, custom tooltip.
+- `dashboard.tsx` — responsive grid 1→2→3 колонки.
+
+### Кредиты (features/loans/)
+
+- `hooks.ts` — useLoans, useLoan, useLoanSchedule, CRUD mutations с invalidation.
+- `LoanCard` — clickable карточка с type/status badges.
+- `LoanFilters` — поиск + Select по типу/статусу.
+- `LoanFormDialog` — create/edit через react-hook-form + zod.
+- `ScheduleChart` — stacked bar (тело vs проценты).
+- `BalanceFormDialog` — обновление остатка.
+- `StrategyToggle` — переключатель reduce_payment/shorten_term.
+- `LoanDetailPage` — полная карточка с графиком, таблицей платежей, действиями.
+- Route `/loans/:id`.
+
+### Технические решения
+
+- base-ui tooltip (shadcn v4) не поддерживает `asChild` — используется прямой render.
+- zod v4 + @hookform/resolvers v5 type mismatch — resolver cast to any (runtime OK).
+- base-ui Select `onValueChange` nullable — добавлены null-guards.
+
+**Проверки:** `tsc -p tsconfig.app.json --noEmit` чисто, ESLint 0 errors (1 warning — known react-hook-form),
+production build проходит (1133 KB JS, 62 KB CSS).
+28 файлов, 2889 строк новых/изменённых.
+
+---

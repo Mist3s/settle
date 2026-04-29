@@ -4,7 +4,7 @@
 
 ## Текущий этап
 
-**Этап 9: Фронтенд — каркас и дизайн-система** — завершён.
+**Этап 10: Фронтенд — дашборд и кредиты** — завершён.
 
 ## Что известно
 
@@ -72,8 +72,18 @@
   - Vite proxy: /api → backend:8000 (dev mode).
   - Hooks: useMediaQuery.
   - Проверки: tsc --noEmit clean, ESLint clean, production build passes.
+- **Фронтенд дашборд и кредиты (этап 10, завершён):**
+  - `src/lib/format.ts` — единые утилиты форматирования (money, date, percent, delta, labels).
+  - 7 дополнительных shadcn/ui компонентов: badge, dialog, select, table, tabs, tooltip, progress.
+  - `LoadingState` — skeleton/error/empty wrapper для useQuery.
+  - Дашборд: 4 виджета (NextPayments с urgency color, CurrentPeriod с traffic-light, Totals с delta, Warnings feed) + ForecastChart (Recharts AreaChart).
+  - Кредиты: LoanCard (clickable), LoanFilters (type/status/search), LoanFormDialog (create/edit, react-hook-form+zod), ScheduleChart (stacked bar тело/проценты), BalanceFormDialog, StrategyToggle.
+  - LoanDetailPage (/loans/:id): полная карточка, график погашения, таблица платежей (table на desktop, cards на mobile).
+  - Hooks: useDashboard, useForecast, useLoans, useLoan, useLoanSchedule, CRUD mutations с invalidation.
+  - Responsive grid: 1→2→3 колонки (дашборд), 1→2→3 (список кредитов).
+  - Проверки: tsc clean, ESLint 0 errors, production build passes.
 - **Тесты:** 283 tests pass (unit + integration). Ruff clean.
 
 ## Следующий шаг
 
-Этап 10: Фронтенд — экраны и интеграция (дашборд, кредиты, симулятор, настройки).
+Этап 11: Фронтенд — симулятор, календарь, история, настройки.
