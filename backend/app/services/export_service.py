@@ -124,10 +124,11 @@ async def export_to_xlsx(
                  ["code", "creditor", "name", "loan_type", "payment_method",
                   "original_amount", "interest_rate", "opening_date", "closing_date",
                   "prepayment_strategy", "priority", "status", "contract_number", "notes"],
-                 [[l.code, l.creditor, l.name, l.loan_type, l.payment_method,
-                   l.original_amount, l.interest_rate, l.opening_date, l.closing_date,
-                   l.prepayment_strategy, l.priority, l.status, l.contract_number, l.notes]
-                  for l in loans])
+                 [[loan.code, loan.creditor, loan.name, loan.loan_type,
+                   loan.payment_method, loan.original_amount, loan.interest_rate,
+                   loan.opening_date, loan.closing_date, loan.prepayment_strategy,
+                   loan.priority, loan.status, loan.contract_number, loan.notes]
+                  for loan in loans])
 
     # --- Balances ---
     loan_ids = list(loan_code_map.keys())

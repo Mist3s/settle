@@ -7,7 +7,7 @@ booleans, date serial numbers).
 
 from datetime import date
 from decimal import Decimal, InvalidOperation
-from typing import Annotated, Any
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -21,7 +21,6 @@ from app.domain.enums import (
     PaymentMethod,
     PrepaymentStrategy,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

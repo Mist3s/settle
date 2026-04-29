@@ -25,7 +25,7 @@ SHEET_DEFS: list[tuple[str, list[str], list[str]]] = [
     (
         "Settings",
         ["key", "value", "description"],
-        ["[delete this row before import] usd_rub_rate", "92.50", "Курс USD/RUB"],
+        ["[delete this row before import] usd_rub_rate", "92.50", "Курс USD/RUB"],  # noqa: RUF001
     ),
     (
         "Loans",
