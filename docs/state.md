@@ -4,9 +4,9 @@
 
 ## Текущий этап
 
-**Этап 12: Фронтенд — симулятор, аналитика, настройки** — завершён.
+**Этап 13: Наблюдаемость, метрики, health checks** — завершён.
 
-**Следующий:** Этап 13 — E2E-тестирование, production polish.
+**Следующий:** Этап 14 — Продакшен-деплой и финальная верификация.
 
 ## Что известно
 
@@ -96,8 +96,15 @@
   - Route: `/incomes`, `/history`.
   - Интеграция: кнопка «Зарегистрировать платёж» на loan-detail с pre-filled loan_id.
   - Проверки: tsc clean, ESLint 0 errors (3 warnings — known react-hook-form), production build passes (1162 KB JS, 65 KB CSS).
-- **Тесты:** 283 tests pass (unit + integration). Ruff clean.
+- **Наблюдаемость (этап 13, завершён):**
+  - structlog processor: фильтрация паролей/токенов/contract_numbers в логах (§12.4).
+  - HTTP request logging middleware: path, method, status_code, duration_ms, user_id, request_id (§13.1).
+  - Prometheus: `prometheus-fastapi-instrumentator` на `/metrics` + 3 кастомных метрики (§13.2).
+  - Health ready: проверка DB + alembic_version (§13.3).
+  - Docker healthcheck: `/api/health/ready`.
+- **Тесты:** 303 tests pass (unit + integration). Ruff clean.
+  - 7 pre-existing failures: 4 auth (seed user not in test transaction), 2 import commit, 1 import idempotency.
 
 ## Следующий шаг
 
-Этап 12: Фронтенд — симулятор, аналитика, настройки.
+Этап 14: Продакшен-деплой и финальная верификация.

@@ -486,3 +486,46 @@ production build проходит (1133 KB JS, 62 KB CSS).
 - 20 задач в 7 волнах, ~18 новых файлов, ~2300 строк.
 
 ---
+
+## Этап 13: Наблюдаемость, метрики, health checks (2026-04-29)
+
+### Что сделано
+
+1. **Фильтрация чувствительных данных в логах (§12.4):**
+   - structlog processor `filter_sensitive_data`: рекурсивная санитизация event dict.
+   - Полная редакция: passwords, tokens, refresh_tokens, secrets, jwt_private_key.
+   - Маскирование contract_number (видны только последние 4 цифры).
+   - 23 unit-теста: parametrized по всем чувствительным ключам, nested dicts, edge cases.
+
+2. **HTTP request/response logging (§13.1):**
+   - Middleware `request_logging_middleware`: объединяет request_id injection и HTTP logging.
+   - Каждый запрос логируется: path, method, status_code, duration_ms, user_id, request_id.
+   - Health и metrics endpoints исключены из логирования (noise reduction).
+
+3. **Prometheus метрики (§13.2):**
+   - `core/metrics.py`: Instrumentator instance + 3 кастомных метрики.
+   - `prometheus-fastapi-instrumentator` подключён: instrument() + expose() на `/metrics`.
+   - Кастомные: `loan_balance_total` (gauge per loan), `payments_planned_today` (gauge), `forecast_compute_duration_seconds` (histogram).
+   - Health/metrics endpoints исключены из стандартных HTTP метрик.
+
+4. **Health ready расширен (§13.3):**
+   - Проверяет не только `SELECT 1`, но и наличие `alembic_version` таблицы с записью.
+   - Short-lived engine для изоляции от test-session state.
+   - Graceful degradation: отсутствие таблицы → 503 "Таблица миграций не найдена".
+
+5. **Docker healthcheck:** обновлён с `/api/health/live` на `/api/health/ready`.
+
+### Ключевые файлы
+- `backend/app/core/logging.py` (105 строк)
+- `backend/app/core/metrics.py` (42 строки)
+- `backend/app/main.py` (230 строк, обновлён)
+- `backend/tests/unit/test_log_filtering.py` (23 теста)
+- `backend/tests/integration/test_observability.py` (4 теста)
+- `docker-compose.dev.yml` (healthcheck)
+
+### Проверки
+- Ruff: all checks passed
+- Pytest: 303 passed, 7 failed (pre-existing: 4 auth seed user, 2 import commit, 1 import idempotency)
+- 27 новых тестов, все зелёные
+
+---
