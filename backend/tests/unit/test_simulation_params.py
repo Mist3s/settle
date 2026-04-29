@@ -4,6 +4,7 @@ from datetime import date
 from decimal import Decimal
 
 import pytest
+from pydantic import ValidationError
 
 from app.domain.schemas.simulation import (
     AddIncomeParams,
@@ -22,7 +23,7 @@ class TestCloseEarlyFullParams:
         assert p is not None
 
     def test_extra_field_rejected(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             CloseEarlyFullParams(foo="bar")
 
 
@@ -88,5 +89,5 @@ class TestValidateActionParams:
             validate_action_params("nonexistent", {})
 
     def test_missing_required_field_raises(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             validate_action_params("prepayment_partial", {})

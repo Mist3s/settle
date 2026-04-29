@@ -8,8 +8,6 @@ import uuid
 from datetime import date
 from decimal import Decimal
 
-import pytest
-
 from app.services.simulation.actions import (
     apply_action,
     apply_add_income,
@@ -24,7 +22,6 @@ from app.services.simulation.projected_state import (
     ProjectedPayment,
     ProjectedState,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -188,7 +185,7 @@ class TestReducePayment:
         apply_reduce_payment(
             state, planned_payment_id=PP_ID_1, new_amount=Decimal("5000.00")
         )
-        target = [p for p in state.payments if p.id == PP_ID_1][0]
+        target = next(p for p in state.payments if p.id == PP_ID_1)
         assert target.amount == Decimal("5000.00")
 
     def test_nonexistent_payment_is_noop(self):
@@ -209,7 +206,7 @@ class TestSkip:
     def test_marks_as_skipped(self):
         state = _make_state()
         apply_skip(state, planned_payment_id=PP_ID_2)
-        target = [p for p in state.payments if p.id == PP_ID_2][0]
+        target = next(p for p in state.payments if p.id == PP_ID_2)
         assert target.status == "skipped"
 
     def test_nonexistent_payment_is_noop(self):
@@ -252,7 +249,7 @@ class TestChangePaymentDate:
         apply_change_payment_date(
             state, planned_payment_id=PP_ID_1, new_date=new_dt
         )
-        target = [p for p in state.payments if p.id == PP_ID_1][0]
+        target = next(p for p in state.payments if p.id == PP_ID_1)
         assert target.due_date == new_dt
 
 

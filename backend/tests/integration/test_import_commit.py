@@ -259,7 +259,11 @@ async def test_commit_audit_log_entries(db_session: AsyncSession) -> None:
     await commit_import(db_session, user.id, parsed)
 
     count = (
-        await db_session.execute(select(func.count()).select_from(AuditLog))
+        await db_session.execute(
+            select(func.count()).select_from(AuditLog).where(
+                AuditLog.changed_by == user.id,
+            )
+        )
     ).scalar_one()
 
     # 1 loan + 1 balance + 1 income = 3 audit records (all CREATEs).
@@ -627,9 +631,16 @@ async def test_commit_transactional_rollback(db_session: AsyncSession) -> None:
     ).scalar_one()
     assert loan_count == 0
 
+    # Filter by user's loans to avoid stale data from previous runs.
+    from sqlalchemy.orm import aliased
+    lb_alias = aliased(LoanBalance)
     bal_count = (
         await db_session.execute(
-            select(func.count()).select_from(LoanBalance),
+            select(func.count()).select_from(lb_alias).join(
+                Loan, lb_alias.loan_id == Loan.id,
+            ).where(
+                Loan.user_id == user.id, Loan.code == "TX_LOAN",
+            ),
         )
     ).scalar_one()
     assert bal_count == 0
@@ -643,10 +654,12 @@ async def test_commit_transactional_rollback(db_session: AsyncSession) -> None:
     ).scalar_one()
     assert income_count == 0
 
-    # Audit log should also be empty after rollback.
+    # Audit log should also be empty for this user after rollback.
     audit_count = (
         await db_session.execute(
-            select(func.count()).select_from(AuditLog),
+            select(func.count()).select_from(AuditLog).where(
+                AuditLog.changed_by == user.id,
+            ),
         )
     ).scalar_one()
     assert audit_count == 0

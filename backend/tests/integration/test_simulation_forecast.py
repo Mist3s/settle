@@ -28,7 +28,6 @@ from app.domain.models.loan import Loan
 from app.domain.models.payment import PlannedPayment
 from app.domain.models.user import User
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -55,7 +54,7 @@ async def seed_data(
 ) -> dict:
     """Create a loan, balance, planned payments, and incomes for testing."""
     # Get user_id from token
-    resp = await client.get("/api/loans", headers=auth_headers)
+    await client.get("/api/loans", headers=auth_headers)
     # Need user from DB
     result = await db_session.execute(
         select(User).where(User.email == "sim@settle.local")

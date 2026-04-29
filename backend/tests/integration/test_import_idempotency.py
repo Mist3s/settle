@@ -110,18 +110,37 @@ async def _snapshot_counts(
     session: AsyncSession,
     user_id,
 ) -> dict[str, int]:
-    """Return entity counts keyed by type for quick comparison."""
+    """Return entity counts keyed by type for quick comparison.
+
+    Models without user_id (LoanBalance, ActualPayment) are filtered
+    through a JOIN with Loan to avoid counting stale data from other
+    test runs or application usage.
+    """
     counts = {}
-    for model, name in [
-        (Loan, "loans"),
-        (LoanBalance, "balances"),
-        (Income, "incomes"),
-        (ActualPayment, "actual_payments"),
-    ]:
-        q = select(func.count()).select_from(model)
-        if hasattr(model, "user_id"):
-            q = q.where(model.user_id == user_id)
+
+    # Models with direct user_id.
+    for model, name in [(Loan, "loans"), (Income, "incomes")]:
+        q = select(func.count()).select_from(model).where(model.user_id == user_id)
         counts[name] = (await session.execute(q)).scalar_one()
+
+    # LoanBalance — filter through Loan.
+    q_bal = (
+        select(func.count())
+        .select_from(LoanBalance)
+        .join(Loan, LoanBalance.loan_id == Loan.id)
+        .where(Loan.user_id == user_id)
+    )
+    counts["balances"] = (await session.execute(q_bal)).scalar_one()
+
+    # ActualPayment — filter through Loan.
+    q_ap = (
+        select(func.count())
+        .select_from(ActualPayment)
+        .join(Loan, ActualPayment.loan_id == Loan.id)
+        .where(Loan.user_id == user_id)
+    )
+    counts["actual_payments"] = (await session.execute(q_ap)).scalar_one()
+
     return counts
 
 

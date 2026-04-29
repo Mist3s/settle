@@ -24,7 +24,6 @@ from app.domain.models.loan import Loan
 from app.domain.models.payment import PlannedPayment
 from app.domain.models.user import User
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -226,7 +225,7 @@ async def test_apply_add_income_creates_real_income(
     incomes_after = list(result.scalars().all())
     assert len(incomes_after) == incomes_before + 1
 
-    new_income = [i for i in incomes_after if i.name == "Freelance"][0]
+    new_income = next(i for i in incomes_after if i.name == "Freelance")
     assert new_income.amount == Decimal("30000.00")
     assert new_income.expected_date == date(2026, 7, 1)
 
