@@ -123,7 +123,18 @@ Import-сервис разбит на пакет `services/import_/` с моду
 ### Зависимости (pyproject.toml)
 - `openpyxl` — уже в pyproject.toml (установлен на этапе 1)
 
+- `services/import_/committer_core.py` — CommitResult + audit helpers (76 строк)
+- `services/import_/committer_loans.py` — commit settings/loans/balances (143 строки)
+- `services/import_/committer_payments.py` — commit incomes/schedule/actual_payments + auto-gen (277 строк)
+- `services/import_/committer.py` — facade commit_import() (101 строка)
+- `tests/integration/test_import_commit.py` — 5 integration-тестов (314 строк)
+
+### Осталось (задачи из breakdown, волна 5+)
+
+- [№8] `services/import_/__init__.py` — public API пакета
+- [№11–13] HTTP endpoints + CLI
+- [№19–23] Integration-тесты (diff, idempotency, API)
+
 ## Следующий шаг
 
-Волна 3 (остаток): задачи №15–18 (unit-тесты header_validator, cross_validator, storage, parser).
-Или волна 4: задачи №6/7 (diff.py / committer.py).
+Волна 5: задача №8 (`services/import_/__init__.py` — public API: `run_dry_run()`, `commit_import()` оркестрация).

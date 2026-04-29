@@ -178,5 +178,10 @@
 8. `tests/fixtures/import_fixtures.py` — build_workbook, 6 row-factory, minimal_valid_workbook (159 строк).
 9. `services/import_/parser.py` — parse_workbook: XLSX→ParsedData + errors + warnings (205 строк) + 10 unit-тестов.
 10. `services/import_/cross_validator.py` — кросс-валидация: 5 правил (loan_code refs, income_code refs, loan→balance, balance equation ±0.01, future snapshot_date). 160 строк + 16 unit-тестов.
+11. `services/import_/diff.py` — build_diff: сравнение ParsedData с БД по бизнес-ключам → DryRunReport (245 строк) + 6 integration-тестов.
+12. `services/import_/committer_core.py` — CommitResult + create_with_audit/update_with_audit (76 строк).
+13. `services/import_/committer_loans.py` — upsert settings/loans/balances (143 строки).
+14. `services/import_/committer_payments.py` — upsert incomes/schedule/actual_payments + cancel pending + auto-gen schedule (277 строк).
+15. `services/import_/committer.py` — facade commit_import() (101 строка) + 5 integration-тестов.
 
-**Тесты:** 136 pass, 0 fail. `ruff check` — clean.
+**Тесты:** 206 pass, 0 fail. `ruff check` — clean.

@@ -25,7 +25,10 @@ services/import_/
 | 4 | `services/import_/cross_validator.py` | `cross_validate(parsed: ParsedData) → list[ImportError]`; 6 правил из спеки (loan_code→Loans, income_code→Incomes, balance per loan, principal+accrued=current, future date, enum) | import_dto.py | S | 80–120 |
 | 5 | `domain/schemas/import_report.py` | Pydantic-схемы dry-run отчёта: `EntityDiff`, `DryRunSummary`, `DryRunReport`, `ImportError`, `ImportWarning` | — | S | 50–70 |
 | 6 | `services/import_/diff.py` | `build_diff(session, user_id, parsed) → DryRunReport`; поиск по бизнес-ключам → create vs update; Income USD→RUB пересчёт; Settings lookup | №5 (import_report), repository layer | M | 120–160 |
-| 7 | `services/import_/committer.py` | `commit_import(session, user_id, diff_report, parsed) → CommitResult`; upsert Loans→Balances→Incomes→Schedule→ActualPayments; cancel existing pending planned; auto-generate schedule (через schedule_service); audit_log на каждую мутацию | №5, №6, schedule_service, audit_service | L | 150–200 |
+| 7a | `services/import_/committer_core.py` | `CommitResult` dataclass + shared `_upsert_with_audit()` helper | — | S | 50–70 |
+| 7b | `services/import_/committer_loans.py` | `_commit_settings`, `_commit_loans`, `_commit_balances` | №7a, №5, №6, audit_service | M | 150–180 |
+| 7c | `services/import_/committer_payments.py` | `_commit_incomes`, `_cancel_pending_schedule`, `_commit_schedule`, `_commit_actual_payments`, `_auto_generate_schedules` | №7a, №5, №6, schedule_service, audit_service | M | 180–220 |
+| 7d | `services/import_/committer.py` | `commit_import()` facade: orchestrates 7b + 7c in order | №7a, №7b, №7c | S | 40–60 |
 | 8 | `services/import_/__init__.py` | Public API: `run_dry_run(session, user_id, file_bytes)`, `commit_import(session, user_id, import_id)`; оркестрация parse→validate→cross_validate→diff→store / store.get→commit | №1–7 | S | 60–90 |
 | 9 | `services/export_service.py` | **Уже реализован** (212 строк). Ревью + мелкие правки если нужно | — | S | — |
 | 10 | `services/template_service.py` | **Уже реализован** (118 строк). Ревью + мелкие правки если нужно | — | S | — |
@@ -70,7 +73,10 @@ services/import_/
 ### Волна 4: Diff и Commit (ядро бизнес-логики)
 
 12. [№6] `services/import_/diff.py` — сравнение с БД
-13. [№7] `services/import_/committer.py` — запись в БД
+13. [№7a] `services/import_/committer_core.py` — CommitResult + shared helper
+14. [№7b] `services/import_/committer_loans.py` — loans + balances + settings
+15. [№7c] `services/import_/committer_payments.py` — incomes + schedule + actual_payments
+16. [№7d] `services/import_/committer.py` — facade
 
 ### Волна 5: Оркестратор
 
@@ -97,5 +103,5 @@ services/import_/
 ## Замечания
 
 - **Тесты идут отдельными задачами**, но в рамках коммитов объединяются с кодом: модуль + его тест = один коммит.
-- **committer.py** — самый крупный модуль (~150–200 строк). Если при реализации превысит 200 строк — разбить на `committer.py` (loans + balances + incomes) и `committer_payments.py` (schedule + actual_payments + side-effects).
+- **committer** — разбит на 4 модуля (7a–7d): `committer_core.py` (~60 строк), `committer_loans.py` (~170 строк), `committer_payments.py` (~210 строк), `committer.py` facade (~50 строк). Причина: monolith был ~580 строк из-за repetitive audit boilerplate.
 - **export_service.py** и **template_service.py** уже готовы и прошли линтер. Ревью = прочитать, убедиться в совместимости с пакетом import_, при необходимости добавить общие константы в shared модуль.
