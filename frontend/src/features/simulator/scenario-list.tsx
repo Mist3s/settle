@@ -62,7 +62,15 @@ export function ScenarioList({ selectedId, onSelect }: ScenarioListProps) {
         }
       >
         <SelectTrigger className="w-full">
-          <SelectValue placeholder="Все статусы" />
+          <SelectValue placeholder="Все статусы">
+            {(v: string) => {
+              const labels: Record<string, string> = {
+                __all__: "Все статусы", draft: "Черновик",
+                applied: "Применён", archived: "Архив",
+              };
+              return labels[v] ?? v;
+            }}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="__all__">Все статусы</SelectItem>

@@ -199,7 +199,11 @@ export function ActionFormDialog({
                   onValueChange={(v) => v && field.onChange(v)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Выберите тип" />
+                    <SelectValue placeholder="Выберите тип">
+                      {(v: string) =>
+                        ACTION_TYPES.find((t) => t.value === v)?.label ?? "Выберите тип"
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {ACTION_TYPES.map((t) => (
@@ -241,7 +245,12 @@ export function ActionFormDialog({
                     onValueChange={(v) => v && field.onChange(v)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Выберите кредит" />
+                      <SelectValue placeholder="Выберите кредит">
+                        {(v: string) => {
+                          const l = loans?.find((loan) => loan.id === v);
+                          return l ? `${l.creditor} — ${l.name}` : "Выберите кредит";
+                        }}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {loans
@@ -271,7 +280,14 @@ export function ActionFormDialog({
                     onValueChange={(v) => v && field.onChange(v)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Выберите платёж" />
+                      <SelectValue placeholder="Выберите платёж">
+                        {(v: string) => {
+                          const p = filteredPayments.find((pp) => pp.id === v);
+                          if (!p) return "Выберите платёж";
+                          const loan = loans?.find((l) => l.id === p.loan_id);
+                          return `${loan?.name ?? "?"} — ${formatDateShort(p.due_date)}`;
+                        }}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {filteredPayments
