@@ -4,12 +4,12 @@
 
 ## Текущий этап
 
-**Этап 6: Импорт и экспорт данных** — в работе.
+**Этап 7: Прогноз и дашборд (бэкенд)** — не начат.
 
 ## Что известно
 
 - Репозиторий содержит `architecture.md` (v1.0, утверждена), `AGENTS.md`.
-- План: 14 этапов, все ADR (001–004) приняты.
+- План: 14 этапов, все ADR (001–006) приняты.
 - Стек: FastAPI + PostgreSQL 16 + React/TypeScript + Docker.
 - Один пользователь, монолит, overlay-симулятор.
 - Docker Compose (dev) работает: db (PostgreSQL 16), backend (FastAPI + uvicorn), frontend (Vite + React).
@@ -22,7 +22,7 @@
 - **Репозитории:** Generic Repository[Model] с soft-delete auto-filtering, refresh после каждого flush.
 - **Сервисы:** loan_service, income_service, payment_service, scenario_service, settings_service, audit_service.
 - **Pydantic-схемы:** all entities, `extra='forbid'`, Decimal as string.
-- **REST API:** /api/loans, /api/payments/{planned,actual}, /api/incomes, /api/scenarios (+actions), /api/settings.
+- **REST API:** /api/loans, /api/payments/{planned,actual}, /api/incomes, /api/scenarios (+actions), /api/settings, /api/import/*, /api/export/*.
 - **Audit log:** model_to_dict (column-only, no lazy-load), record() для каждой мутации.
 - **Расчётный движок:**
   - `schedule_service.py`: generate_schedule (аннуитет), recalculate_after_prepayment (обе стратегии), solve_for_n.
@@ -30,119 +30,27 @@
   - `payment_service.py`: register_payment (полная цепочка: тип → actual → баланс → график → planned status → audit).
   - `GET /api/loans/{id}/schedule`, `POST /api/loans/{id}/recalc-schedule`.
   - Float-сканер тест.
-- **Тесты:** 120 tests pass (unit + integration). Ruff clean.
-
-## Этап 6: что готово
-
-- **DTO** (`domain/schemas/import_dto.py`): 6 Pydantic-моделей для листов XLSX-шаблона:
-  - `SettingImportRow`, `LoanImportRow`, `BalanceImportRow`, `ScheduleImportRow`, `IncomeImportRow`, `ActualPaymentImportRow`
-  - Хелперы: `_parse_decimal` (запятая→точка, неразрывные пробелы), `_parse_bool` (true/false/1/0/yes/no/да/нет), `_parse_date` (ISO + Excel serial)
-  - Все модели с `extra='forbid'`
-
-## Этап 6: что осталось реализовать
-
-Детальная декомпозиция: [docs/notes/stage6_breakdown.md](notes/stage6_breakdown.md).
-Спецификация: [docs/notes/stage6_import_export.md](notes/stage6_import_export.md).
-
-### Готово
-
-- `domain/schemas/import_dto.py` — 6 DTO моделей для листов XLSX
-- `domain/schemas/import_report.py` — 7 Pydantic-моделей dry-run отчёта (92 строки)
-- `services/export_service.py` — экспорт в XLSX (212 строк)
-- `services/template_service.py` — генерация шаблона (118 строк)
-- `services/import_/storage.py` — DryRunStore: in-memory TTL хранилище (64 строки) + 6 unit-тестов
-- `services/import_/header_validator.py` — валидация заголовков листов (107 строк) + 11 unit-тестов
-- `tests/fixtures/import_fixtures.py` — фабрики тестовых XLSX (159 строк)
-- `services/import_/parser.py` — parse_workbook XLSX→DTO (205 строк) + 10 unit-тестов
-- `services/import_/cross_validator.py` — кросс-валидация между листами (160 строк) + 16 unit-тестов
-- `tests/unit/test_import_dto.py` — 59 unit-тестов на хелперы и 6 DTO моделей (302 строки)
-
-### Обнаруженные gap'ы в import_dto.py
-
-> **GAP-1: `LoanImportRow.original_amount` — нет валидации обязательности для credit/installment.**
-> В задаче указано: `original_amount` обязательно для `credit`/`installment`, опционально для `utilities`/`other_debt`.
-> В DTO поле `Optional` без `model_validator`. В `cross_validator.py` тоже нет такой проверки.
-> **Предложение:** добавить `model_validator` в `LoanImportRow` отдельным коммитом.
-
-> **GAP-2: `BalanceImportRow.principal_balance` — нет default = current_balance.**
-> В задаче указано: если `principal_balance` не задан, он должен равняться `current_balance`.
-> В DTO `principal_balance: Decimal | None = None` без `model_validator`.
-> **Предложение:** добавить `model_validator` в `BalanceImportRow` отдельным коммитом.
-
-### Осталось (23 atomic-задачи, 8 волн)
-
-Import-сервис разбит на пакет `services/import_/` с модулями:
-`storage`, `header_validator`, `parser`, `cross_validator`, `diff`, `committer`, `__init__`.
-
-Полный перечень задач, зависимостей и порядок — в stage6_breakdown.md.
-
-
-## Ключевые факты для реализации (VERIFIED)
-
-### Бизнес-ключи (architecture.md §11.4)
-| Сущность | Бизнес-ключ | Поведение |
-|----------|-------------|-----------|
-| Loan | `code` | Все поля обновляются |
-| Balance | `(loan_code, snapshot_date)` | Все поля обновляются |
-| Schedule | `(loan_code, due_date)` | Все поля обновляются |
-| Income | `code` | Все поля обновляются |
-| ActualPayment | `(loan_code, payment_date, amount)` | Все поля обновляются |
-
-### ORM-модели: поля для поиска по бизнес-ключу
-- `Loan`: `code` (String(32)), `user_id` (UUID), unique constraint `uq_loans_user_id_code`
-- `LoanBalance`: `loan_id` (UUID), `snapshot_date` (Date), unique constraint `uq_loan_balances_loan_id_snapshot_date`
-- `PlannedPayment`: `loan_id` + `due_date`, нет unique constraint (нужен поиск вручную)
-- `Income`: `code` (String(64)), unique=True (глобально, не per-user)
-- `ActualPayment`: `loan_id` + `payment_date` + `amount`, нет unique constraint
-- `Setting`: `user_id` + `key`, unique constraint `uq_settings_user_id_key`
-
-### Репозитории: доступный API
-- `Repository.list(filters={...})` — фильтрация по атрибутам
-- `Repository.create(**kwargs)` → flush + refresh
-- `Repository.update(entity_id, **kwargs)` → flush + refresh
-- `SettingsRepository.get_by_key(user_id, key)`
-- `BalanceRepository.get_latest(loan_id)`
-
-### Сервисный паттерн
-- Функции модульного уровня (не классы), принимают `session: AsyncSession` + `user_id: uuid.UUID`
-- Репозитории создаются внутри функций: `repo = LoanRepository(session)`
-- Audit записывается через `audit_service.record(session, entity_type=..., entity_id=..., action=..., before_state=..., after_state=..., changed_by=...)`
-- `audit_service.model_to_dict(instance)` — безопасная сериализация ORM
-
-### API паттерн
-- Роутеры в `api/routers/`, тонкий HTTP-слой
-- `Depends(get_current_user)` для аутентификации, `Depends(get_session)` для БД
-- Роутеры зависят только от сервисов и схем
-- Decimal-конвертация в роутерах (str → Decimal)
-
-### Архитектура: алгоритм импорта (§11.3)
-1. Dry-run: загрузка XLSX → проверка 3 обязательных листов → валидация заголовков → парсинг строк → кросс-валидация → сравнение с БД → отчёт
-2. Commit: по import_id → одна транзакция → audit_log → для Schedule: cancel existing pending → для кредитов без Schedule: ScheduleService
-3. Dry-run результат хранится 30 мин, `import_id` = UUID
-
-### Зависимости (pyproject.toml)
-- `openpyxl` — уже в pyproject.toml (установлен на этапе 1)
-
-- `services/import_/committer_core.py` — CommitResult + audit helpers (76 строк)
-- `services/import_/committer_loans.py` — commit settings/loans/balances (143 строки)
-- `services/import_/committer_payments.py` — commit incomes/schedule/actual_payments + auto-gen (277 строк)
-- `services/import_/committer.py` — facade commit_import() (101 строка)
-- `tests/integration/test_import_commit.py` — 9 integration-тестов (650 строк)
-- `domain/constants/import_export.py` — shared constants (82 строки), единый источник имён листов и колонок
-
-### Осталось (задачи из breakdown, волна 7+)
-
-- ~~[№9] `services/export_service.py` — ревью~~ ✅
-- ~~[№10] `services/template_service.py` — ревью~~ ✅
-- ~~[№11] `api/routers/import_data.py` — REST эндпоинты~~ ✅
-- ~~[№12] `app/main.py` — подключение роутера~~ ✅
-- ~~[№13] `app/cli.py` — CLI команды~~ ✅ (166 строк, argparse)
-- ~~[№19] `tests/integration/test_import_diff.py`~~ ✅ (7 тестов, 370 строк)
-- ~~[№20] `tests/integration/test_import_commit.py`~~ ✅ (9 тестов, 650 строк)
-- ~~[№21] `tests/integration/test_import_idempotency.py`~~ ✅ (3 теста, 242 строки)
-- ~~[№22] `tests/integration/test_import_api.py`~~ ✅ (9 тестов, 220 строк)
-- [№23] — уже реализовано в рамках предыдущих задач
+- **Импорт и экспорт данных (этап 6, завершён):**
+  - Пакет `services/import_/` (8 модулей, ~1170 строк): storage, header_validator, parser, cross_validator, diff, committer (4 модуля), orchestrator.
+  - `services/export_service.py` (212 строк): экспорт 6 сущностей в XLSX.
+  - `services/template_service.py` (118 строк): генерация XLSX-шаблона (пустой + с примерами).
+  - `domain/constants/import_export.py` (82 строки): единый источник имён листов и колонок.
+  - `domain/schemas/import_dto.py` (221 строка): 6 DTO с _parse_decimal/_parse_bool/_parse_date.
+  - `domain/schemas/import_report.py` (92 строки): DryRunReport, EntityDiff, ScheduleDiff.
+  - `api/routers/import_data.py` (154 строки): POST /import/excel (dry-run), POST /import/excel/commit, GET /import/template, GET /export/excel.
+  - `app/cli.py` (166 строк, argparse): template, import (--dry-run/--commit), export.
+  - Идемпотентность по бизнес-ключам: Loan(code), Balance(loan_code+snapshot_date), Schedule(loan_code+due_date), Income(code), ActualPayment(loan_code+payment_date+amount).
+  - DryRunStore: in-memory dict с TTL 30 мин, lazy GC.
+  - Зависимость: python-multipart для multipart/form-data.
+- **Тесты:** 223 tests pass (unit + integration). Ruff clean.
 
 ## Следующий шаг
 
-Этап 6 завершён. Все 23 atomic-задачи выполнены.
+Этап 7: Прогноз и дашборд (бэкенд). Предусловие — этап 5 (завершён).
+
+Что нужно:
+- `services/forecast_service.py`: `forecast_balance_by_day()` — прогноз свободных денег по дням.
+- `services/dashboard_service.py`: агрегаты для главной (ближайшие платежи, остаток на жизнь, общий долг, предупреждения).
+- Роутер `api/routers/dashboard.py`: `GET /api/dashboard`, `GET /api/forecast/balance-by-day`.
+- Фоновые задачи (APScheduler в lifespan): `accrue_interest` (ежедневно 03:00 МСК), `refresh_planned_status` (ежедневно 00:30 МСК).
+- Добавление `overdue` в enum `payment_status` (миграция).

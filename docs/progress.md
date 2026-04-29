@@ -157,9 +157,9 @@
 
 ---
 
-## Этап 6: Импорт и экспорт данных (в работе)
+## Этап 6: Импорт и экспорт данных (завершён)
 
-**Дата начала:** 2026-04-29
+**Дата:** 2026-04-29
 
 **Что сделано:**
 
@@ -209,3 +209,31 @@
 21. **Integration-тесты idempotency** (задача №21, §14.3 critical): `tests/integration/test_import_idempotency.py` — 3 теста (242 строки): двойной прогон идентичного XLSX → counts и export совпадают; roundtrip export→re-import→compare; частичный update (одна строка изменена → обновляется только она). 214 тестов зелёные, ruff чистый.
 
 22. **Integration-тесты API** (задача №22): `tests/integration/test_import_api.py` — 9 тестов (220 строк): multipart upload → DryRunReport (200), commit с import_id (200), commit с несуществующим id (410 Gone), template download (пустой + with_examples), export download + since-фильтр, unauthenticated → 401/403, non-XLSX файл → 400. Добавлена обработка `BadZipFile`/`InvalidFileException` в роутере `import_data.py`. 223 теста зелёные, ruff чистый.
+
+### Финальный обзор этапа 6
+
+Этап 6 полностью завершён. Все 23 atomic-задачи из `docs/notes/stage6_breakdown.md` выполнены в 8 волнах.
+
+**Ключевые модули:**
+- Пакет `services/import_/` (8 модулей, ~1170 строк): парсинг XLSX→DTO, валидация заголовков и кросс-ссылок, diff с БД по бизнес-ключам, commit в одной транзакции с audit_log, in-memory TTL store.
+- `services/export_service.py` (212 строк): экспорт всех 6 сущностей в XLSX.
+- `services/template_service.py` (118 строк): генерация пустого/example шаблона.
+- `domain/constants/import_export.py` (82 строки): единый источник имён листов/колонок.
+- `domain/schemas/import_dto.py` (221 строка): 6 DTO с хелперами парсинга.
+- `domain/schemas/import_report.py` (92 строки): dry-run отчёт.
+- `api/routers/import_data.py` (154 строки): 4 HTTP-эндпоинта.
+- `app/cli.py` (166 строк): CLI на argparse (template, import, export).
+
+**Тесты:** 223 pass, 0 fail. Из них по этапу 6: 59 unit (DTO) + 11 (header_validator) + 16 (cross_validator) + 6 (storage) + 10 (parser) + 7 (diff integration) + 9 (commit integration) + 3 (idempotency) + 9 (API integration) = 130 тестов.
+
+**Критические тесты §14.3:** идемпотентность импорта (двойной прогон, roundtrip export→import, partial update) — зелёные.
+
+**E2E верификация:** CLI template → заполнение minimal_valid_workbook → import --dry-run (0 errors) → --commit (1 loan, 1 balance, 1 setting created) → проверка данных в PostgreSQL → audit_log корректен.
+
+**ADR:** ADR-005 (пакет вместо monolith), ADR-006 (argparse вместо typer).
+
+**Известные ограничения:**
+- DryRunStore — in-memory, не переживает перезапуск backend (достаточно для однопользовательского приложения).
+- GAP-1/GAP-2 (model_validator на LoanImportRow.original_amount и BalanceImportRow.principal_balance) — задокументированы в state.md, не критичны для работы.
+
+---
