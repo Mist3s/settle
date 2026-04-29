@@ -18,9 +18,8 @@ import { formatMoneyCompact, formatDateCompact, formatMoney } from "@/lib/format
 import { useForecast } from "./hooks";
 import { CHART } from "@/lib/chart-colors";
 
-interface Props {
-  startingBalance: string;
-}
+// No props needed — forecast always starts from 0,
+// incomes and payments are calculated by the engine.
 
 interface ChartPoint {
   date: string;
@@ -45,8 +44,8 @@ function CustomTooltip({
   );
 }
 
-export function ForecastChart({ startingBalance }: Props) {
-  const { data, isLoading, isError } = useForecast(startingBalance);
+export function ForecastChart() {
+  const { data, isLoading, isError } = useForecast("0");
 
   if (isLoading) {
     return (

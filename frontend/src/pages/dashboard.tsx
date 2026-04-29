@@ -43,9 +43,7 @@ export function DashboardPage() {
             <WarningsWidget warnings={data.warnings} />
 
             {/* Forecast chart */}
-            <ForecastChart
-              startingBalance={data.current_period.remaining_for_living}
-            />
+            <ForecastChart />
           </>
         )}
       </LoadingState>
