@@ -183,5 +183,6 @@
 13. `services/import_/committer_loans.py` — upsert settings/loans/balances (143 строки).
 14. `services/import_/committer_payments.py` — upsert incomes/schedule/actual_payments + cancel pending + auto-gen schedule (277 строк).
 15. `services/import_/committer.py` — facade commit_import() (101 строка) + 5 integration-тестов.
+16. `services/import_/orchestrator.py` — оркестратор: run_dry_run(), commit_import(), ImportExpiredError, ImportNotFoundError (~110 строк). `__init__.py` — тонкий реэкспорт. DryRunStore.put() расширен optional key.
 
 **Тесты:** 206 pass, 0 fail. `ruff check` — clean.

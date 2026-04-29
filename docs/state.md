@@ -129,12 +129,13 @@ Import-сервис разбит на пакет `services/import_/` с моду
 - `services/import_/committer.py` — facade commit_import() (101 строка)
 - `tests/integration/test_import_commit.py` — 5 integration-тестов (314 строк)
 
-### Осталось (задачи из breakdown, волна 5+)
+### Осталось (задачи из breakdown, волна 6+)
 
-- [№8] `services/import_/__init__.py` — public API пакета
+- [№9] `services/export_service.py` — ревью
+- [№10] `services/template_service.py` — ревью
 - [№11–13] HTTP endpoints + CLI
 - [№19–23] Integration-тесты (diff, idempotency, API)
 
 ## Следующий шаг
 
-Волна 5: задача №8 (`services/import_/__init__.py` — public API: `run_dry_run()`, `commit_import()` оркестрация).
+Волна 6: ревью export_service.py и template_service.py (задачи №9–10).

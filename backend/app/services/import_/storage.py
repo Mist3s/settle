@@ -31,9 +31,13 @@ class DryRunStore:
 
     # -- public API ----------------------------------------------------------
 
-    def put(self, payload: Any) -> uuid.UUID:
-        """Store *payload* and return a fresh UUID key."""
-        key = uuid.uuid4()
+    def put(self, payload: Any, *, key: uuid.UUID | None = None) -> uuid.UUID:
+        """Store *payload* and return the UUID key.
+
+        If *key* is not provided a fresh one is generated.
+        """
+        if key is None:
+            key = uuid.uuid4()
         self._data[key] = _Entry(
             payload=payload,
             expires_at=time.monotonic() + self._ttl,
