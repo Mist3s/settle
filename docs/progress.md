@@ -75,3 +75,30 @@
 
 **Ограничения:** Logout — no-op (stateless JWT, нет blocklist). Future: Redis token blocklist.
 
+---
+
+## Этап 4: Репозитории и базовый CRUD
+
+**Дата:** 2026-04-29
+
+**Что сделано:**
+
+1. **Generic Repository** (`repositories/base.py`): PEP 695 type params, auto soft-delete filtering, CRUD (get/list/create/update/soft_delete/restore), refresh после каждого flush для предотвращения MissingGreenlet.
+2. **Специализированные репозитории** для всех сущностей: loan, payment (planned + actual), income, balance (+ get_latest), scenario + action (+ list_by_scenario), settings (+ get_by_key, list_by_user), audit_log (+ list_by_entity).
+3. **Pydantic-схемы** для всех сущностей: `extra='forbid'` на request-моделях, Decimal → string в JSON, `from_attributes=True` на response-моделях.
+4. **Сервисный слой** (`services/`): loan_service, income_service, payment_service, scenario_service, settings_service — вся бизнес-логика и audit_log запись вынесены из роутеров.
+5. **Audit service** (`services/audit_service.py`): `model_to_dict` через `__dict__` (не `getattr`) для безопасного чтения в async-контексте, `record()` для записи в audit_log.
+6. **REST роутеры**: тонкий HTTP-слой, только Decimal-конвертация и HTTP-ответы. Роутеры зависят только от сервисов и схем.
+7. **Тесты:** integration-тесты для loans (create, list, get, update, delete, audit_log, balance, extra field rejection), incomes (full CRUD + receive), scenarios (CRUD + actions), settings (upsert + list). Unit-тесты для audit_service serialization.
+
+**Ключевые файлы:**
+- `backend/app/repositories/base.py` — generic repository
+- `backend/app/services/{loan,income,payment,scenario,settings,audit}_service.py`
+- `backend/app/api/routers/{loans,payments,incomes,scenarios,settings}.py`
+- `backend/app/domain/schemas/{loan,payment,income,balance,scenario,settings}.py`
+
+**Тесты:** 57 pass, 0 fail. `ruff check` — clean.
+
+**Решённые проблемы:**
+- `MissingGreenlet` при серлизации ORM → Pydantic: `session.refresh()` после flush + `__dict__` в model_to_dict.
+- Архитектурное соблюдение: бизнес-логика строго в services, роутеры тонкие.

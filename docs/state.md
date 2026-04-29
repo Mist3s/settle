@@ -4,10 +4,9 @@
 
 ## Текущий этап
 
-**Этап 2: Доменная модель и миграции** — завершён.
-**Этап 3: Аутентификация и безопасность** — завершён.
+**Этап 4: Репозитории и базовый CRUD** — завершён.
 
-Следующий — **Этап 4: Репозитории и базовый CRUD** (зависит от 2 и 3).
+Следующий — **Этап 5: Импорт данных** (зависит от 4).
 
 ## Что известно
 
@@ -19,11 +18,16 @@
 - Backend: pydantic-settings, async SQLAlchemy, structlog JSON, Alembic (async env.py), health endpoints.
 - Frontend: Vite + React + TS (strict), Tailwind 4, TanStack Query, path alias @/.
 - CI: GitHub Actions (lint + test backend, tsc + build frontend).
-- **Доменная модель:** 10 ORM-моделей (users, loans, loan_balances, incomes, planned_payments, actual_payments, scenarios, scenario_actions, settings, audit_log), 12 PG enum-типов, все индексы/constraints из архитектуры.
-- **Миграция:** `001_initial_schema` с явным lifecycle PG enum типов. upgrade/downgrade/upgrade проходят чисто.
-- **Аутентификация:** JWT RS256 (access 15 мин, refresh 30 дней), argon2id хеширование, seed user из .env, RFC 7807 error format, `extra='forbid'` на request-схемах.
-- **Health ready:** проверяет подключение к БД (SELECT 1).
+- **Доменная модель:** 10 ORM-моделей, 12 PG enum-типов, все индексы/constraints из архитектуры.
+- **Миграция:** `001_initial_schema` с явным lifecycle PG enum типов.
+- **Аутентификация:** JWT RS256 (access 15 мин, refresh 30 дней), argon2id, seed user.
+- **Репозитории:** Generic Repository[Model] с soft-delete auto-filtering, refresh после каждого flush.
+- **Сервисы:** loan_service, income_service, payment_service, scenario_service, settings_service, audit_service.
+- **Pydantic-схемы:** all entities, `extra='forbid'`, Decimal as string.
+- **REST API:** /api/loans, /api/payments/{planned,actual}, /api/incomes, /api/scenarios (+actions), /api/settings.
+- **Audit log:** model_to_dict (column-only, no lazy-load), record() для каждой мутации.
+- **Тесты:** 57 tests pass (integration + unit).
 
 ## Следующий шаг
 
-Начать этап 4 (репозитории и CRUD).
+Начать этап 5 (импорт данных).
