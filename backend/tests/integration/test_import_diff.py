@@ -20,6 +20,7 @@ from app.domain.models.balance import LoanBalance
 from app.domain.models.income import Income
 from app.domain.models.loan import Loan
 from app.domain.models.payment import ActualPayment, PlannedPayment
+from app.domain.models.settings import Setting
 from app.domain.models.user import User
 from app.domain.schemas.import_dto import (
     ActualPaymentImportRow,
@@ -334,3 +335,35 @@ async def test_diff_schedule_to_cancel_existing(
     assert report.summary.schedule.to_update == 1  # 2026-04-15 matches
     assert report.summary.schedule.to_create == 1  # 2026-07-15 new
     assert report.summary.schedule.to_cancel_existing == 3  # 3 pending
+
+
+@pytest.mark.asyncio()
+async def test_diff_usd_to_rub_via_db_setting(db_session: AsyncSession) -> None:
+    """When Settings sheet has no usd_rub_rate, fall back to DB Setting."""
+    user = await _create_user(db_session)
+
+    # Store rate in the database, not in the spreadsheet
+    setting = Setting(
+        user_id=user.id,
+        key="usd_rub_rate",
+        value="95.00",
+    )
+    db_session.add(setting)
+    await db_session.flush()
+
+    parsed = ParsedData(
+        settings=[],  # No usd_rub_rate in the sheet
+        incomes=[
+            IncomeImportRow(
+                code="USD_DB",
+                expected_date=date(2026, 6, 1),
+                amount_usd=Decimal("200"),
+            ),
+        ],
+    )
+
+    report = await build_diff(db_session, user.id, parsed)
+
+    # Rate found in DB → no warnings
+    assert len(report.warnings) == 0
+    assert report.summary.incomes.to_create == 1
