@@ -90,38 +90,72 @@ async def _current_period(
     user_id: uuid.UUID,
     today: date,
 ) -> CurrentPeriod:
-    """Compute the financial summary for the current period.
+    """Compute the financial summary for the current salary period.
 
-    Current period = [today, next_income_date).
+    Salary period = [current_income_date .. next_income_date - 1].
+    If today is before the first income, show the first full period.
     """
-    # Find next income date
-    stmt_next_income = (
+    income_filter = and_(
+        Income.user_id == user_id,
+        Income.status.in_([IncomeStatus.EXPECTED, IncomeStatus.RECEIVED]),
+        Income.is_deleted.is_(False),
+    )
+
+    # 1. Find the most recent income on or before today (prev_income).
+    stmt_prev = (
         select(Income.expected_date, Income.amount)
-        .where(
-            Income.user_id == user_id,
-            Income.expected_date >= today,
-            Income.status.in_([IncomeStatus.EXPECTED, IncomeStatus.RECEIVED]),
-            Income.is_deleted.is_(False),
-        )
+        .where(income_filter, Income.expected_date <= today)
+        .order_by(Income.expected_date.desc())
+        .limit(1)
+    )
+    prev_row = (await session.execute(stmt_prev)).first()
+
+    # 2. Find the first income strictly after today (next_income).
+    stmt_next = (
+        select(Income.expected_date, Income.amount)
+        .where(income_filter, Income.expected_date > today)
         .order_by(Income.expected_date)
         .limit(1)
     )
-    row = (await session.execute(stmt_next_income)).first()
+    next_row = (await session.execute(stmt_next)).first()
 
-    if row is not None:
-        next_income_date = row.expected_date
-        income_amount = row.amount
+    if prev_row is not None:
+        # We are inside an existing salary period.
+        period_start = prev_row.expected_date
+        income_amount = prev_row.amount
+        if next_row is not None:
+            period_end = next_row.expected_date - timedelta(days=1)
+        else:
+            # No next income — assume 30 days from period start.
+            period_end = period_start + timedelta(days=30)
+    elif next_row is not None:
+        # Today is before the first income — show the first full period.
+        period_start = next_row.expected_date
+        income_amount = next_row.amount
+        # Find the income after the first one for the period end.
+        stmt_second = (
+            select(Income.expected_date)
+            .where(income_filter, Income.expected_date > next_row.expected_date)
+            .order_by(Income.expected_date)
+            .limit(1)
+        )
+        second_row = (await session.execute(stmt_second)).first()
+        if second_row is not None:
+            period_end = second_row.expected_date - timedelta(days=1)
+        else:
+            period_end = period_start + timedelta(days=30)
     else:
-        # Fallback: 30 days ahead, zero income
-        next_income_date = today + timedelta(days=30)
+        # No incomes at all — fallback.
+        period_start = today
+        period_end = today + timedelta(days=30)
         income_amount = Decimal("0")
 
-    # Sum pending planned payments in period [today, next_income_date)
+    # Sum pending planned payments in period [period_start, period_end].
     stmt_payments = select(func.coalesce(func.sum(PlannedPayment.amount), 0)).where(
         and_(
             PlannedPayment.user_id == user_id,
-            PlannedPayment.due_date >= today,
-            PlannedPayment.due_date < next_income_date,
+            PlannedPayment.due_date >= period_start,
+            PlannedPayment.due_date <= period_end,
             PlannedPayment.status.in_([PaymentStatus.PENDING, PaymentStatus.OVERDUE]),
             PlannedPayment.is_deleted.is_(False),
         )
@@ -147,8 +181,8 @@ async def _current_period(
         status = "deficit"
 
     return CurrentPeriod(
-        from_date=today,
-        to_date=next_income_date,
+        from_date=period_start,
+        to_date=period_end,
         income=str(income_amount),
         planned_payments_total=str(payments_total),
         remaining_for_living=str(remaining_for_living),

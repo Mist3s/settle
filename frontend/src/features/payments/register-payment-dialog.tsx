@@ -29,7 +29,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useLoans } from "@/features/loans/hooks";
 import { usePlannedPayments, useRegisterPayment } from "@/features/payments/hooks";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, todayString } from "@/lib/format";
 import type { ActualPaymentType } from "@/types/api";
 
 // ---------------------------------------------------------------------------
@@ -113,7 +113,7 @@ export function RegisterPaymentDialog({
       loan_id: defaultLoanId ?? "",
       planned_payment_id: "",
       amount: "",
-      payment_date: new Date().toISOString().slice(0, 10),
+      payment_date: todayString(),
       payment_type: "regular",
       notes: "",
     },
@@ -159,7 +159,7 @@ export function RegisterPaymentDialog({
         loan_id: defaultLoanId ?? "",
         planned_payment_id: "",
         amount: "",
-        payment_date: new Date().toISOString().slice(0, 10),
+        payment_date: todayString(),
         payment_type: "regular",
         notes: "",
       });

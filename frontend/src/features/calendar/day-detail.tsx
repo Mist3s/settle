@@ -5,6 +5,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 import {
   formatMoney,
   formatDate,
@@ -39,7 +40,7 @@ export function DayDetail({ date, payments, loansMap, onClose }: DayDetailProps)
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-3">
         <CardTitle className="text-base">
-          {formatDate(date.toISOString().slice(0, 10))}
+          {formatDate(format(date, "yyyy-MM-dd"))}
         </CardTitle>
         <button
           type="button"

@@ -79,6 +79,15 @@ export function formatDateCompact(value: string | null | undefined): string {
   return format(d, "dd.MM", { locale: ru });
 }
 
+/**
+ * Today's date as "YYYY-MM-DD" in **local** timezone.
+ * Use instead of `new Date().toISOString().slice(0,10)` which
+ * returns UTC date and shifts -1 day in UTC+ timezones.
+ */
+export function todayString(): string {
+  return format(new Date(), "yyyy-MM-dd");
+}
+
 // ---------------------------------------------------------------------------
 // Percentages
 // ---------------------------------------------------------------------------
