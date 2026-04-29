@@ -8,6 +8,7 @@ import { ProtectedRoute } from "./protected-route";
 import { LoginPage } from "@/pages/login";
 import { DashboardPage } from "@/pages/dashboard";
 import { LoansPage } from "@/pages/loans";
+import { LoanDetailPage } from "@/pages/loan-detail";
 import { CalendarPage } from "@/pages/calendar";
 import { SimulatorPage } from "@/pages/simulator";
 import { SettingsPage } from "@/pages/settings";
@@ -34,6 +35,10 @@ export const router = createBrowserRouter([
           {
             path: "loans",
             element: <LoansPage />,
+          },
+          {
+            path: "loans/:id",
+            element: <LoanDetailPage />,
           },
           {
             path: "calendar",
