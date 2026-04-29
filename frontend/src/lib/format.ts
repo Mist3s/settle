@@ -159,6 +159,29 @@ const ACCURACY_LABELS: Record<string, string> = {
   estimate: "Оценка",
 };
 
+const INCOME_STATUS_LABELS: Record<string, string> = {
+  expected: "Ожидается",
+  received: "Получено",
+  cancelled: "Отменено",
+};
+
+const ACTUAL_PAYMENT_TYPE_LABELS: Record<string, string> = {
+  regular: "Регулярный",
+  early_partial: "Досрочный частичный",
+  early_full: "Досрочный полный",
+  overpayment: "Переплата",
+  underpayment: "Недоплата",
+  missed: "Пропущен",
+};
+
+const LOAN_TYPE_COLORS: Record<string, string> = {
+  credit: "bg-blue-500",
+  installment: "bg-emerald-500",
+  split: "bg-violet-500",
+  utilities: "bg-gray-400",
+  other_debt: "bg-red-500",
+};
+
 export function loanTypeLabel(type: string): string {
   return LOAN_TYPE_LABELS[type] ?? type;
 }
@@ -173,4 +196,16 @@ export function paymentStatusLabel(status: string): string {
 
 export function accuracyLabel(accuracy: string): string {
   return ACCURACY_LABELS[accuracy] ?? accuracy;
+}
+
+export function incomeStatusLabel(status: string): string {
+  return INCOME_STATUS_LABELS[status] ?? status;
+}
+
+export function actualPaymentTypeLabel(type: string): string {
+  return ACTUAL_PAYMENT_TYPE_LABELS[type] ?? type;
+}
+
+export function loanTypeColor(type: string): string {
+  return LOAN_TYPE_COLORS[type] ?? "bg-gray-400";
 }

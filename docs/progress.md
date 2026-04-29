@@ -386,3 +386,52 @@ production build проходит (1133 KB JS, 62 KB CSS).
 28 файлов, 2889 строк новых/изменённых.
 
 ---
+
+## Этап 11: Фронтенд — платежи, поступления, календарь
+
+**Дата:** 2026-04-29
+
+### Что сделано
+
+1. **Инфраструктура:**
+   - `api/incomes.ts` — API-модуль для поступлений (CRUD + receive).
+   - `lib/format.ts` — добавлены labels: `incomeStatusLabel()`, `actualPaymentTypeLabel()`, `loanTypeColor()`.
+
+2. **Поступления (features/incomes/):**
+   - `hooks.ts` — TanStack Query: useIncomes, useCreateIncome, useUpdateIncome, useReceiveIncome, useDeleteIncome.
+   - `income-card.tsx` — карточка с badge статуса, кнопками «Получено», «Изменить», «Удалить».
+   - `income-form.tsx` — dialog create/edit (react-hook-form + zod).
+   - `income-filters.tsx` — поиск + select статуса.
+   - `pages/incomes.tsx` — страница со списком, фильтрами, CRUD.
+
+3. **Регистрация платежей (features/payments/):**
+   - `hooks.ts` — TanStack Query: usePlannedPayments, useActualPayments, useRegisterPayment, useDeleteActualPayment.
+   - `register-payment-dialog.tsx` — форма с auto-type detection (сравнение суммы с planned), предупреждения overpayment/underpayment.
+
+4. **Календарь (features/calendar/):**
+   - `hooks.ts` — useCalendarPayments (диапазон дат), useCalendarLoans.
+   - `calendar-header.tsx` — навигация по месяцам + «Сегодня».
+   - `calendar-grid.tsx` — desktop: 7-col grid, mobile: vertical list.
+   - `day-cell.tsx` — цветовые точки по loan_type (credit=синий, installment=зелёный, split=фиолетовый, etc.).
+   - `day-detail.tsx` — popup с деталями платежей дня.
+   - `pages/calendar.tsx` — месячный вид + кнопка «+ Платёж».
+
+5. **История (features/payments/):**
+   - `payment-card.tsx` — карточка фактического платежа с type badge.
+   - `payment-filters.tsx` — фильтры: кредит, тип, date range.
+   - `pages/history.tsx` — лента фактических платежей.
+
+6. **Навигация и роутинг:**
+   - Routes: `/incomes`, `/history`.
+   - Sidebar + mobile nav: добавлены «Поступления» (Wallet), «История» (History).
+
+7. **Интеграция loan-detail:**
+   - Кнопка «Зарегистрировать платёж» → RegisterPaymentDialog с pre-filled loan_id.
+
+### Проверки
+- tsc: clean (0 errors)
+- ESLint: 0 errors, 3 warnings (known react-hook-form incompatible-library)
+- Production build: passes (1162 KB JS, 65 KB CSS)
+- 13 новых файлов, ~1840 строк новых/изменённых, 5 файлов обновлены.
+
+---

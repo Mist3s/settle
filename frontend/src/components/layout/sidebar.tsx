@@ -7,7 +7,9 @@ import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   CreditCard,
+  Wallet,
   CalendarDays,
+  History,
   FlaskConical,
   Settings,
 } from "lucide-react";
@@ -16,7 +18,9 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Дашборд" },
   { to: "/loans", icon: CreditCard, label: "Кредиты" },
+  { to: "/incomes", icon: Wallet, label: "Поступления" },
   { to: "/calendar", icon: CalendarDays, label: "Календарь" },
+  { to: "/history", icon: History, label: "История" },
   { to: "/simulator", icon: FlaskConical, label: "Симулятор" },
   { to: "/settings", icon: Settings, label: "Настройки" },
 ] as const;

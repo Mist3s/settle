@@ -4,7 +4,7 @@
 
 ## Текущий этап
 
-**Этап 10: Фронтенд — дашборд и кредиты** — завершён.
+**Этап 11: Фронтенд — платежи, поступления, календарь** — завершён.
 
 ## Что известно
 
@@ -82,8 +82,20 @@
   - Hooks: useDashboard, useForecast, useLoans, useLoan, useLoanSchedule, CRUD mutations с invalidation.
   - Responsive grid: 1→2→3 колонки (дашборд), 1→2→3 (список кредитов).
   - Проверки: tsc clean, ESLint 0 errors, production build passes.
+- **Фронтенд платежи, поступления, календарь (этап 11, завершён):**
+  - `api/incomes.ts` (47 строк): CRUD + receive API-модуль.
+  - `features/incomes/` (4 файла, ~540 строк): hooks, income-card, income-form (react-hook-form+zod), income-filters.
+  - `pages/incomes.tsx` (91 строка): страница поступлений с фильтрацией и CRUD.
+  - `features/payments/` (4 файла, ~700 строк): hooks, register-payment-dialog (auto-type detection), payment-card, payment-filters.
+  - `features/calendar/` (5 файлов, ~560 строк): hooks, calendar-header, calendar-grid (desktop grid + mobile list), day-cell (цветовая кодировка по loan_type), day-detail.
+  - `pages/calendar.tsx` (92 строки): месячный вид с навигацией, интеграция RegisterPaymentDialog.
+  - `pages/history.tsx` (79 строк): лента фактических платежей с фильтрами.
+  - Навигация: добавлены «Поступления», «История» в sidebar и mobile nav.
+  - Route: `/incomes`, `/history`.
+  - Интеграция: кнопка «Зарегистрировать платёж» на loan-detail с pre-filled loan_id.
+  - Проверки: tsc clean, ESLint 0 errors (3 warnings — known react-hook-form), production build passes (1162 KB JS, 65 KB CSS).
 - **Тесты:** 283 tests pass (unit + integration). Ruff clean.
 
 ## Следующий шаг
 
-Этап 11: Фронтенд — симулятор, календарь, история, настройки.
+Этап 12: Фронтенд — симулятор, аналитика, настройки.

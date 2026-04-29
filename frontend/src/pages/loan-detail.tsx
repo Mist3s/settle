@@ -20,6 +20,7 @@ import { ScheduleChart } from "@/features/loans/schedule-chart";
 import { LoanFormDialog } from "@/features/loans/loan-form";
 import { BalanceFormDialog } from "@/features/loans/balance-form";
 import { StrategyToggle } from "@/features/loans/strategy-toggle";
+import { RegisterPaymentDialog } from "@/features/payments/register-payment-dialog";
 import {
   formatMoney,
   formatDate,
@@ -43,6 +44,7 @@ export function LoanDetailPage() {
   const { data: schedule, isLoading: scheduleLoading } = useLoanSchedule(id ?? "");
   const [showEdit, setShowEdit] = useState(false);
   const [showBalance, setShowBalance] = useState(false);
+  const [showRegisterPayment, setShowRegisterPayment] = useState(false);
 
   return (
     <div className="space-y-4">
@@ -123,6 +125,9 @@ export function LoanDetailPage() {
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => setShowBalance(true)}>
                     Обновить остаток
+                  </Button>
+                  <Button size="sm" onClick={() => setShowRegisterPayment(true)}>
+                    Зарегистрировать платёж
                   </Button>
                   <StrategyToggle loan={loan} />
                 </div>
@@ -248,6 +253,11 @@ export function LoanDetailPage() {
               open={showBalance}
               onOpenChange={setShowBalance}
               loanId={loan.id}
+            />
+            <RegisterPaymentDialog
+              open={showRegisterPayment}
+              onOpenChange={setShowRegisterPayment}
+              defaultLoanId={loan.id}
             />
           </>
         )}

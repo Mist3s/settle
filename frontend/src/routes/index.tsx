@@ -9,7 +9,9 @@ import { LoginPage } from "@/pages/login";
 import { DashboardPage } from "@/pages/dashboard";
 import { LoansPage } from "@/pages/loans";
 import { LoanDetailPage } from "@/pages/loan-detail";
+import { IncomesPage } from "@/pages/incomes";
 import { CalendarPage } from "@/pages/calendar";
+import { HistoryPage } from "@/pages/history";
 import { SimulatorPage } from "@/pages/simulator";
 import { SettingsPage } from "@/pages/settings";
 
@@ -41,8 +43,16 @@ export const router = createBrowserRouter([
             element: <LoanDetailPage />,
           },
           {
+            path: "incomes",
+            element: <IncomesPage />,
+          },
+          {
             path: "calendar",
             element: <CalendarPage />,
+          },
+          {
+            path: "history",
+            element: <HistoryPage />,
           },
           {
             path: "simulator",
