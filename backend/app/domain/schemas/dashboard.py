@@ -87,5 +87,6 @@ class DashboardResponse(BaseModel):
 
     next_payments: list[NextPayment]
     current_period: CurrentPeriod
+    next_period: CurrentPeriod | None = None
     totals: DashboardTotals
     warnings: list[DashboardWarning]

@@ -349,6 +349,7 @@ export interface DashboardWarning {
 export interface DashboardResponse {
   next_payments: NextPayment[];
   current_period: CurrentPeriod;
+  next_period: CurrentPeriod | null;
   totals: DashboardTotals;
   warnings: DashboardWarning[];
 }

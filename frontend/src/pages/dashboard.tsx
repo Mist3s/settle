@@ -29,12 +29,21 @@ export function DashboardPage() {
       >
         {data && (
           <>
-            {/* Top row: 3 metric widgets */}
+            {/* Top row: period + totals widgets */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <NextPaymentsWidget payments={data.next_payments} />
               <CurrentPeriodWidget period={data.current_period} />
-              <TotalsWidget totals={data.totals} />
+              {data.next_period ? (
+                <CurrentPeriodWidget period={data.next_period} />
+              ) : (
+                <TotalsWidget totals={data.totals} />
+              )}
             </div>
+            {data.next_period && (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <TotalsWidget totals={data.totals} />
+              </div>
+            )}
 
             {/* Warnings */}
             <WarningsWidget warnings={data.warnings} />

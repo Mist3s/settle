@@ -85,72 +85,14 @@ async def _next_payments(
     ]
 
 
-async def _current_period(
+async def _build_period(
     session: AsyncSession,
     user_id: uuid.UUID,
-    today: date,
+    period_start: date,
+    period_end: date,
+    income_amount: Decimal,
 ) -> CurrentPeriod:
-    """Compute the financial summary for the current salary period.
-
-    Salary period = [current_income_date .. next_income_date - 1].
-    If today is before the first income, show the first full period.
-    """
-    income_filter = and_(
-        Income.user_id == user_id,
-        Income.status.in_([IncomeStatus.EXPECTED, IncomeStatus.RECEIVED]),
-        Income.is_deleted.is_(False),
-    )
-
-    # 1. Find the most recent income on or before today (prev_income).
-    stmt_prev = (
-        select(Income.expected_date, Income.amount)
-        .where(income_filter, Income.expected_date <= today)
-        .order_by(Income.expected_date.desc())
-        .limit(1)
-    )
-    prev_row = (await session.execute(stmt_prev)).first()
-
-    # 2. Find the first income strictly after today (next_income).
-    stmt_next = (
-        select(Income.expected_date, Income.amount)
-        .where(income_filter, Income.expected_date > today)
-        .order_by(Income.expected_date)
-        .limit(1)
-    )
-    next_row = (await session.execute(stmt_next)).first()
-
-    if prev_row is not None:
-        # We are inside an existing salary period.
-        period_start = prev_row.expected_date
-        income_amount = prev_row.amount
-        if next_row is not None:
-            period_end = next_row.expected_date - timedelta(days=1)
-        else:
-            # No next income — assume 30 days from period start.
-            period_end = period_start + timedelta(days=30)
-    elif next_row is not None:
-        # Today is before the first income — show the first full period.
-        period_start = next_row.expected_date
-        income_amount = next_row.amount
-        # Find the income after the first one for the period end.
-        stmt_second = (
-            select(Income.expected_date)
-            .where(income_filter, Income.expected_date > next_row.expected_date)
-            .order_by(Income.expected_date)
-            .limit(1)
-        )
-        second_row = (await session.execute(stmt_second)).first()
-        if second_row is not None:
-            period_end = second_row.expected_date - timedelta(days=1)
-        else:
-            period_end = period_start + timedelta(days=30)
-    else:
-        # No incomes at all — fallback.
-        period_start = today
-        period_end = today + timedelta(days=30)
-        income_amount = Decimal("0")
-
-    # Sum pending planned payments in period [period_start, period_end].
+    """Build a CurrentPeriod for a given [start, end] range."""
     stmt_payments = select(func.coalesce(func.sum(PlannedPayment.amount), 0)).where(
         and_(
             PlannedPayment.user_id == user_id,
@@ -163,7 +105,6 @@ async def _current_period(
     payments_total = (await session.execute(stmt_payments)).scalar() or Decimal("0")
     payments_total = Decimal(str(payments_total))
 
-    # Get living minimum setting
     living_min_raw = await _get_setting_value(
         session, user_id, "living_minimum_per_period"
     )
@@ -172,7 +113,6 @@ async def _current_period(
     remaining = income_amount - payments_total
     remaining_for_living = remaining - living_min
 
-    # Traffic light status
     if remaining_for_living >= living_min:
         status = "comfortable"
     elif remaining_for_living >= Decimal("0"):
@@ -190,6 +130,86 @@ async def _current_period(
     )
 
 
+async def _salary_periods(
+    session: AsyncSession,
+    user_id: uuid.UUID,
+    today: date,
+) -> tuple[CurrentPeriod, CurrentPeriod | None]:
+    """Compute current and next salary periods.
+
+    Returns (current_period, next_period).
+    next_period is None when there aren't enough incomes.
+    """
+    income_filter = and_(
+        Income.user_id == user_id,
+        Income.status.in_([IncomeStatus.EXPECTED, IncomeStatus.RECEIVED]),
+        Income.is_deleted.is_(False),
+    )
+
+    # Fetch upcoming incomes (up to 3 to cover current + next + boundary).
+    stmt_future = (
+        select(Income.expected_date, Income.amount)
+        .where(income_filter, Income.expected_date > today)
+        .order_by(Income.expected_date)
+        .limit(3)
+    )
+    future_rows = list((await session.execute(stmt_future)).all())
+
+    # Find the most recent income on or before today.
+    stmt_prev = (
+        select(Income.expected_date, Income.amount)
+        .where(income_filter, Income.expected_date <= today)
+        .order_by(Income.expected_date.desc())
+        .limit(1)
+    )
+    prev_row = (await session.execute(stmt_prev)).first()
+
+    # Determine boundaries for current period.
+    if prev_row is not None:
+        cur_start = prev_row.expected_date
+        cur_income = prev_row.amount
+        if future_rows:
+            cur_end = future_rows[0].expected_date - timedelta(days=1)
+        else:
+            cur_end = cur_start + timedelta(days=30)
+    elif future_rows:
+        # Before first income — show first full period as "current".
+        cur_start = future_rows[0].expected_date
+        cur_income = future_rows[0].amount
+        if len(future_rows) >= 2:
+            cur_end = future_rows[1].expected_date - timedelta(days=1)
+        else:
+            cur_end = cur_start + timedelta(days=30)
+        # Shift future_rows so next-period logic works correctly.
+        future_rows = future_rows[1:]
+    else:
+        # No incomes at all.
+        fallback = await _build_period(
+            session, user_id, today, today + timedelta(days=30), Decimal("0"),
+        )
+        return fallback, None
+
+    current = await _build_period(session, user_id, cur_start, cur_end, cur_income)
+
+    # Determine next period boundaries.
+    next_rows = future_rows
+
+    if next_rows:
+        nxt_start = next_rows[0].expected_date
+        nxt_income = next_rows[0].amount
+        if len(next_rows) >= 2:
+            nxt_end = next_rows[1].expected_date - timedelta(days=1)
+        else:
+            nxt_end = nxt_start + timedelta(days=30)
+        next_period = await _build_period(
+            session, user_id, nxt_start, nxt_end, nxt_income,
+        )
+    else:
+        next_period = None
+
+    return current, next_period
+
+
 async def _totals(
     session: AsyncSession,
     user_id: uuid.UUID,
@@ -204,7 +224,6 @@ async def _totals(
     active_count = (await session.execute(stmt_count)).scalar() or 0
 
     # Total debt: sum of latest balance per active loan
-    # Subquery: latest balance per loan
     latest_balance_sq = (
         select(
             LoanBalance.loan_id,
@@ -220,7 +239,6 @@ async def _totals(
             LoanBalance.snapshot_date == latest_balance_sq.c.max_date,
         )
     )
-    # Filter to active loans only
     active_loan_ids = select(Loan.id).where(
         Loan.user_id == user_id,
         Loan.status == LoanStatus.ACTIVE,
@@ -229,10 +247,7 @@ async def _totals(
     stmt_debt = stmt_debt.where(LoanBalance.loan_id.in_(active_loan_ids))
     total_debt = Decimal(str((await session.execute(stmt_debt)).scalar() or 0))
 
-    # Month-to-month change: simplified — diff of total_debt vs 30 days ago
-    # For now return "0.00" as a placeholder; proper calculation needs
-    # historical balance data or a materialized snapshot, which isn't
-    # available until we have accrue_interest running daily.
+    # Placeholder until accrue_interest runs daily.
     m2m_change = Decimal("0.00")
 
     return DashboardTotals(
@@ -319,13 +334,14 @@ async def get_dashboard(
         today = date.today()
 
     next_pay = await _next_payments(session, user_id, today)
-    period = await _current_period(session, user_id, today)
+    current, next_period = await _salary_periods(session, user_id, today)
     total = await _totals(session, user_id)
     warns = await _warnings(session, user_id, today)
 
     return DashboardResponse(
         next_payments=next_pay,
-        current_period=period,
+        current_period=current,
+        next_period=next_period,
         totals=total,
         warnings=warns,
     )
