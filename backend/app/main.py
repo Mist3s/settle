@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select, text
 
 from app.api.routers.auth import router as auth_router
+from app.api.routers.dashboard import router as dashboard_router
 from app.api.routers.import_data import router as import_data_router
 from app.api.routers.incomes import router as incomes_router
 from app.api.routers.loans import router as loans_router
@@ -23,6 +24,7 @@ from app.core.database import async_session_factory
 from app.core.logging import setup_logging
 from app.core.security import hash_password
 from app.domain.models.user import User
+from app.tasks.scheduler import start_scheduler, stop_scheduler
 
 
 async def _seed_user() -> None:
@@ -56,7 +58,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Seed the default user
     await _seed_user()
 
+    # Start background job scheduler
+    await start_scheduler()
+
     yield
+
+    # Stop scheduler on shutdown
+    await stop_scheduler()
     log.info("settle_shutting_down")
 
 
@@ -128,6 +136,7 @@ app.include_router(incomes_router)
 app.include_router(scenarios_router)
 app.include_router(settings_router)
 app.include_router(import_data_router)
+app.include_router(dashboard_router)
 
 
 # --- Health endpoints ---
