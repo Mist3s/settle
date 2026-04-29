@@ -12,10 +12,12 @@ from __future__ import annotations
 import dataclasses
 from datetime import date
 from uuid import UUID
+from zipfile import BadZipFile
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
 from fastapi.responses import Response
+from openpyxl.utils.exceptions import InvalidFileException
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -78,7 +80,13 @@ async def upload_excel(
         size=len(contents),
     )
 
-    report = await run_dry_run(session, current_user.id, contents)
+    try:
+        report = await run_dry_run(session, current_user.id, contents)
+    except (BadZipFile, InvalidFileException) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Файл не является корректным XLSX-документом",
+        ) from exc
     return report
 
 
