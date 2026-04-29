@@ -127,7 +127,7 @@ Import-сервис разбит на пакет `services/import_/` с моду
 - `services/import_/committer_loans.py` — commit settings/loans/balances (143 строки)
 - `services/import_/committer_payments.py` — commit incomes/schedule/actual_payments + auto-gen (277 строк)
 - `services/import_/committer.py` — facade commit_import() (101 строка)
-- `tests/integration/test_import_commit.py` — 5 integration-тестов (314 строк)
+- `tests/integration/test_import_commit.py` — 9 integration-тестов (650 строк)
 - `domain/constants/import_export.py` — shared constants (82 строки), единый источник имён листов и колонок
 
 ### Осталось (задачи из breakdown, волна 7+)
@@ -138,8 +138,9 @@ Import-сервис разбит на пакет `services/import_/` с моду
 - ~~[№12] `app/main.py` — подключение роутера~~ ✅
 - ~~[№13] `app/cli.py` — CLI команды~~ ✅ (166 строк, argparse)
 - ~~[№19] `tests/integration/test_import_diff.py`~~ ✅ (7 тестов, 370 строк)
-- [№20–23] Integration-тесты (commit, idempotency, API)
+- ~~[№20] `tests/integration/test_import_commit.py`~~ ✅ (9 тестов, 650 строк)
+- [№21–23] Integration-тесты (idempotency, API)
 
 ## Следующий шаг
 
-Волна 8: integration-тесты — задача №20 (`tests/integration/test_import_commit.py`).
+Волна 8: integration-тесты — задача №21 (`tests/integration/test_import_idempotency.py`).
