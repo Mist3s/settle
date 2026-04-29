@@ -12,6 +12,11 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select, text
 
 from app.api.routers.auth import router as auth_router
+from app.api.routers.incomes import router as incomes_router
+from app.api.routers.loans import router as loans_router
+from app.api.routers.payments import router as payments_router
+from app.api.routers.scenarios import router as scenarios_router
+from app.api.routers.settings import router as settings_router
 from app.core.config import settings
 from app.core.database import async_session_factory
 from app.core.logging import setup_logging
@@ -116,6 +121,11 @@ async def validation_exception_handler(
 # --- Routers ---
 
 app.include_router(auth_router)
+app.include_router(loans_router)
+app.include_router(payments_router)
+app.include_router(incomes_router)
+app.include_router(scenarios_router)
+app.include_router(settings_router)
 
 
 # --- Health endpoints ---

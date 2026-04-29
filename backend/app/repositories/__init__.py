@@ -1,1 +1,1 @@
-# repositories package
+"""Repositories package."""

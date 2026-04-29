@@ -1,1 +1,1 @@
-# domain schemas package
+"""Domain schemas package."""
