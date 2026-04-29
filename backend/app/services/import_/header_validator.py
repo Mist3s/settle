@@ -4,39 +4,11 @@ Compares actual column names against the specification (architecture.md §11.2)
 and reports missing / unexpected columns.
 """
 
+from app.domain.constants.import_export import (
+    REQUIRED_SHEETS,
+    SHEET_COLUMN_SETS,
+)
 from app.domain.schemas.import_report import ImportError
-
-# ---------------------------------------------------------------------------
-# Reference column sets per sheet (architecture.md §11.2)
-# ---------------------------------------------------------------------------
-
-SHEET_COLUMNS: dict[str, set[str]] = {
-    "Settings": {"key", "value", "description"},
-    "Loans": {
-        "code", "creditor", "name", "loan_type", "payment_method",
-        "original_amount", "interest_rate", "opening_date", "closing_date",
-        "prepayment_strategy", "priority", "status", "contract_number", "notes",
-    },
-    "Balances": {
-        "loan_code", "snapshot_date", "current_balance",
-        "principal_balance", "accrued_interest", "source", "notes",
-    },
-    "Schedule": {
-        "loan_code", "due_date", "amount", "principal_part", "interest_part",
-        "accuracy", "can_pay_early", "income_code", "notes",
-    },
-    "Incomes": {
-        "code", "expected_date", "amount_rub", "amount_usd",
-        "name", "status", "notes",
-    },
-    "ActualPayments": {
-        "loan_code", "payment_date", "amount", "principal_part",
-        "interest_part", "payment_type", "planned_due_date", "notes",
-    },
-}
-
-REQUIRED_SHEETS: set[str] = {"Settings", "Loans", "Balances"}
-
 
 # ---------------------------------------------------------------------------
 # Public API
@@ -53,7 +25,7 @@ def validate_headers(
     - missing columns
     - extra (unexpected) columns
     """
-    expected = SHEET_COLUMNS.get(sheet_name)
+    expected = SHEET_COLUMN_SETS.get(sheet_name)
     if expected is None:
         return [
             ImportError(

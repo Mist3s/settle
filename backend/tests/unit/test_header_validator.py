@@ -1,9 +1,8 @@
 """Unit tests for services/import_/header_validator.py."""
 
+from app.domain.constants.import_export import REQUIRED_SHEETS, SHEET_COLUMNS
 from app.domain.schemas.import_report import ImportError as ImportErrorSchema
 from app.services.import_.header_validator import (
-    REQUIRED_SHEETS,
-    SHEET_COLUMNS,
     validate_headers,
     validate_required_sheets,
 )

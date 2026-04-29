@@ -23,7 +23,7 @@ from io import BytesIO
 
 from openpyxl import Workbook
 
-from app.services.import_.header_validator import SHEET_COLUMNS
+from app.domain.constants.import_export import SHEET_COLUMNS
 
 # ---------------------------------------------------------------------------
 # Low-level workbook builder

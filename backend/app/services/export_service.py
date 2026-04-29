@@ -17,6 +17,20 @@ from openpyxl.styles import Font
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.domain.constants.import_export import (
+    ACTUAL_PAYMENTS_COLUMNS,
+    BALANCES_COLUMNS,
+    INCOMES_COLUMNS,
+    LOANS_COLUMNS,
+    SCHEDULE_COLUMNS,
+    SETTINGS_COLUMNS,
+    SHEET_ACTUAL_PAYMENTS,
+    SHEET_BALANCES,
+    SHEET_INCOMES,
+    SHEET_LOANS,
+    SHEET_SCHEDULE,
+    SHEET_SETTINGS,
+)
 from app.domain.models.balance import LoanBalance
 from app.domain.models.income import Income
 from app.domain.models.loan import Loan
@@ -30,6 +44,8 @@ def _cell_value(v: Any) -> Any:
     """Convert Python value to an Excel-friendly representation."""
     if v is None:
         return ""
+    if isinstance(v, bool):
+        return v
     if isinstance(v, Decimal):
         return str(v)
     if isinstance(v, date):
@@ -111,8 +127,8 @@ async def export_to_xlsx(
     if since:
         stmt = stmt.where(Setting.updated_at >= since)
     settings = (await session.execute(stmt)).scalars().all()
-    _write_sheet(wb, "Settings",
-                 ["key", "value", "description"],
+    _write_sheet(wb, SHEET_SETTINGS,
+                 SETTINGS_COLUMNS,
                  [[s.key, s.value, s.description] for s in settings])
 
     # --- Loans ---
@@ -120,10 +136,8 @@ async def export_to_xlsx(
     if since:
         stmt = stmt.where(Loan.updated_at >= since)
     loans = (await session.execute(stmt)).scalars().all()
-    _write_sheet(wb, "Loans",
-                 ["code", "creditor", "name", "loan_type", "payment_method",
-                  "original_amount", "interest_rate", "opening_date", "closing_date",
-                  "prepayment_strategy", "priority", "status", "contract_number", "notes"],
+    _write_sheet(wb, SHEET_LOANS,
+                 LOANS_COLUMNS,
                  [[loan.code, loan.creditor, loan.name, loan.loan_type,
                    loan.payment_method, loan.original_amount, loan.interest_rate,
                    loan.opening_date, loan.closing_date, loan.prepayment_strategy,
@@ -139,9 +153,8 @@ async def export_to_xlsx(
         balances = (await session.execute(stmt)).scalars().all()
     else:
         balances = []
-    _write_sheet(wb, "Balances",
-                 ["loan_code", "snapshot_date", "current_balance",
-                  "principal_balance", "accrued_interest", "source", "notes"],
+    _write_sheet(wb, SHEET_BALANCES,
+                 BALANCES_COLUMNS,
                  [[loan_code_map.get(b.loan_id, ""), b.snapshot_date,
                    b.current_balance, b.principal_balance, b.accrued_interest,
                    b.source, b.notes] for b in balances])
@@ -158,9 +171,8 @@ async def export_to_xlsx(
         planned = (await session.execute(stmt)).scalars().all()
     else:
         planned = []
-    _write_sheet(wb, "Schedule",
-                 ["loan_code", "due_date", "amount", "principal_part",
-                  "interest_part", "accuracy", "can_pay_early", "income_code", "notes"],
+    _write_sheet(wb, SHEET_SCHEDULE,
+                 SCHEDULE_COLUMNS,
                  [[loan_code_map.get(p.loan_id, ""), p.due_date,
                    p.amount, p.principal_part, p.interest_part,
                    p.accuracy, p.can_pay_early,
@@ -172,9 +184,8 @@ async def export_to_xlsx(
     if since:
         stmt = stmt.where(Income.updated_at >= since)
     incomes = (await session.execute(stmt)).scalars().all()
-    _write_sheet(wb, "Incomes",
-                 ["code", "expected_date", "amount_rub", "amount_usd",
-                  "name", "status", "notes"],
+    _write_sheet(wb, SHEET_INCOMES,
+                 INCOMES_COLUMNS,
                  [[i.code, i.expected_date, i.amount, None,
                    i.name, i.status, i.notes] for i in incomes])
 
@@ -198,9 +209,8 @@ async def export_to_xlsx(
             for row in (await session.execute(stmt2)):
                 planned_due_dates[row.id] = row.due_date
 
-    _write_sheet(wb, "ActualPayments",
-                 ["loan_code", "payment_date", "amount", "principal_part",
-                  "interest_part", "payment_type", "planned_due_date", "notes"],
+    _write_sheet(wb, SHEET_ACTUAL_PAYMENTS,
+                 ACTUAL_PAYMENTS_COLUMNS,
                  [[loan_code_map.get(a.loan_id, ""), a.payment_date,
                    a.amount, a.principal_part, a.interest_part,
                    a.payment_type,

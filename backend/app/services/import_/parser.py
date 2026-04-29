@@ -15,6 +15,10 @@ from typing import Any
 from openpyxl import load_workbook
 from pydantic import BaseModel, ValidationError
 
+from app.domain.constants.import_export import (
+    EXAMPLE_ROW_MARKER,
+    SHEET_COLUMNS,
+)
 from app.domain.schemas.import_dto import (
     ActualPaymentImportRow,
     BalanceImportRow,
@@ -30,7 +34,6 @@ from app.domain.schemas.import_report import (
     ImportWarning,
 )
 from app.services.import_.header_validator import (
-    SHEET_COLUMNS,
     validate_headers,
     validate_required_sheets,
 )
@@ -48,8 +51,7 @@ _SHEET_DTO: dict[str, type[BaseModel]] = {
     "ActualPayments": ActualPaymentImportRow,
 }
 
-# Marker text in the first cell of example rows (architecture.md §11.6).
-EXAMPLE_ROW_MARKER = "[delete this row before import]"
+
 
 
 # ---------------------------------------------------------------------------

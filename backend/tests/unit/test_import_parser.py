@@ -6,9 +6,8 @@ from io import BytesIO
 
 from openpyxl import Workbook
 
-from app.services.import_.header_validator import SHEET_COLUMNS
+from app.domain.constants.import_export import EXAMPLE_ROW_MARKER, SHEET_COLUMNS
 from app.services.import_.parser import (
-    EXAMPLE_ROW_MARKER,
     ParsedData,
     parse_workbook,
 )
